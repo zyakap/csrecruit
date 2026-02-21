@@ -1,0 +1,95 @@
+{% extends 'hr_admin/base.html' %}
+{% block title %}Vacancies - HR Admin{% endblock %}
+{% block hr_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="bi bi-briefcase me-2"></i>Vacancy Management</h4>
+    <a href="{% url 'hr_admin:vacancy_create' %}" class="btn btn-pngcs">
+        <i class="bi bi-plus-circle me-2"></i>Create Vacancy
+    </a>
+</div>
+
+<!-- Filter -->
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-auto">
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All Status</option>
+                    <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
+                    <option value="open" {% if status_filter == 'open' %}selected{% endif %}>Open</option>
+                    <option value="closed" {% if status_filter == 'closed' %}selected{% endif %}>Closed</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-pngcs">Filter</button>
+                <a href="{% url 'hr_admin:vacancy_list' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Reference</th>
+                        <th>Title</th>
+                        <th>Province</th>
+                        <th>Qualification</th>
+                        <th>Closes</th>
+                        <th>Applications</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vacancy in vacancies %}
+                    <tr>
+                        <td><code>{{ vacancy.reference_number }}</code></td>
+                        <td>
+                            <strong>{{ vacancy.title }}</strong><br>
+                            <small class="text-muted">{{ vacancy.department }}</small>
+                        </td>
+                        <td>{{ vacancy.province }}</td>
+                        <td><span class="badge bg-secondary">{{ vacancy.get_qualification_level_display }}</span></td>
+                        <td>{{ vacancy.close_date|date:"d M Y" }}</td>
+                        <td>
+                            <span class="badge bg-primary">{{ vacancy.app_count }}</span>
+                        </td>
+                        <td>
+                            {% if vacancy.status == 'open' %}<span class="badge bg-success">Open</span>
+                            {% elif vacancy.status == 'closed' %}<span class="badge bg-danger">Closed</span>
+                            {% else %}<span class="badge bg-secondary">{{ vacancy.get_status_display }}</span>{% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'hr_admin:vacancy_edit' vacancy.pk %}" class="btn btn-outline-primary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'hr_admin:vacancy_toggle' vacancy.pk %}" class="btn btn-outline-{% if vacancy.status == 'open' %}warning{% else %}success{% endif %}" title="Toggle Status">
+                                    <i class="bi bi-{% if vacancy.status == 'open' %}pause{% else %}play{% endif %}"></i>
+                                </a>
+                                <a href="{% url 'hr_admin:run_screening' vacancy.pk %}" class="btn btn-outline-info" title="Run AI Screening"
+                                   onclick="return confirm('Run automated AI screening for all applications to {{ vacancy.title }}?')">
+                                    <i class="bi bi-robot"></i>
+                                </a>
+                                <a href="{% url 'hr_admin:shortlist' vacancy.pk %}" class="btn btn-outline-success" title="Shortlist">
+                                    <i class="bi bi-star"></i>
+                                </a>
+                                <a href="{% url 'hr_admin:export_shortlist' vacancy.pk %}" class="btn btn-outline-secondary" title="Export Excel">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center text-muted py-4">No vacancies found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

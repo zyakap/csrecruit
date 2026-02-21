@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Interview Scoring - PNGCS{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0"><i class="bi bi-clipboard-check me-2"></i>Interview Assessment</h4>
+        <a href="{% url 'panel:dashboard' %}" class="btn btn-outline-secondary btn-sm">Back</a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header bg-pngcs text-white">
+                    <h6 class="mb-0">Applicant Profile</h6>
+                </div>
+                <div class="card-body small">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="mb-1"><strong>Name:</strong> {{ application.full_name }}</p>
+                            <p class="mb-1"><strong>Gender:</strong> {{ application.gender }}</p>
+                            <p class="mb-1"><strong>Province:</strong> {{ application.province }}</p>
+                            <p class="mb-1"><strong>Phone:</strong> {{ application.phone }}</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="mb-1"><strong>Qualification:</strong> {{ application.get_highest_qualification_display }}</p>
+                            <p class="mb-1"><strong>Institution:</strong> {{ application.institution }}</p>
+                            <p class="mb-1"><strong>Grade:</strong> {{ application.grade_result }}</p>
+                            <p class="mb-1"><strong>Experience:</strong> {{ application.years_experience }} yr(s)</p>
+                        </div>
+                    </div>
+                    {% if application.ai_summary %}
+                    <div class="alert alert-info mt-2 mb-0 small">
+                        <i class="bi bi-robot me-2"></i><strong>AI Summary:</strong> {{ application.ai_summary }}
+                    </div>
+                    {% endif %}
+                    {% if application.cover_letter %}
+                    <hr>
+                    <strong>Cover Letter:</strong>
+                    <p class="small mt-1">{{ application.cover_letter }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold">Documents</h6></div>
+                <div class="card-body p-0">
+                    {% for doc in documents %}
+                    <div class="border-bottom px-3 py-2 d-flex justify-content-between">
+                        <span class="small"><i class="bi bi-file-earmark me-1"></i>{{ doc.get_doc_type_display }}</span>
+                        <a href="{{ doc.file.url }}" target="_blank" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-eye"></i></a>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small p-3 mb-0">No documents.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-pngcs text-white">
+                    <h6 class="mb-0"><i class="bi bi-star me-2"></i>Interview Score Card</h6>
+                    <small class="opacity-75">{{ interview.scheduled_date|date:"d M Y" }} | {{ interview.venue }}</small>
+                </div>
+                <div class="card-body">
+                    {% if existing_score %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle me-2"></i><strong>Score already submitted.</strong>
+                        Total: {{ existing_score.score }}/100 | {{ existing_score.get_recommendation_display }}
+                    </div>
+                    <table class="table table-sm">
+                        <tr><td>Communication Skills</td><td><strong>{{ existing_score.communication_score }}/20</strong></td></tr>
+                        <tr><td>Job Knowledge</td><td><strong>{{ existing_score.knowledge_score }}/30</strong></td></tr>
+                        <tr><td>Attitude & Professionalism</td><td><strong>{{ existing_score.attitude_score }}/25</strong></td></tr>
+                        <tr><td>Relevant Experience</td><td><strong>{{ existing_score.experience_score }}/25</strong></td></tr>
+                        <tr class="table-success"><td><strong>Total Score</strong></td><td><strong>{{ existing_score.score }}/100</strong></td></tr>
+                    </table>
+                    {% if existing_score.comments %}
+                    <p class="small"><strong>Comments:</strong> {{ existing_score.comments }}</p>
+                    {% endif %}
+                    {% else %}
+                    <form method="post" id="scoreForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{ form.communication_score.label }}</label>
+                            {{ form.communication_score }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{ form.knowledge_score.label }}</label>
+                            {{ form.knowledge_score }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{ form.attitude_score.label }}</label>
+                            {{ form.attitude_score }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">{{ form.experience_score.label }}</label>
+                            {{ form.experience_score }}
+                        </div>
+                        <div class="alert alert-info py-2">
+                            <strong>Calculated Total: <span id="totalScore">0</span>/100</strong>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Recommendation</label>
+                            {{ form.recommendation }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Panel Comments</label>
+                            {{ form.comments }}
+                        </div>
+                        <button type="submit" class="btn btn-pngcs w-100"
+                                onclick="return confirm('Submit your interview score? This cannot be changed.')">
+                            <i class="bi bi-check-circle me-2"></i>Submit Score
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function updateTotal() {
+    const comm = parseFloat(document.querySelector('[name="communication_score"]')?.value || 0);
+    const know = parseFloat(document.querySelector('[name="knowledge_score"]')?.value || 0);
+    const att = parseFloat(document.querySelector('[name="attitude_score"]')?.value || 0);
+    const exp = parseFloat(document.querySelector('[name="experience_score"]')?.value || 0);
+    document.getElementById('totalScore').textContent = (comm + know + att + exp).toFixed(1);
+}
+document.querySelectorAll('input[type="number"]').forEach(el => el.addEventListener('input', updateTotal));
+updateTotal();
+</script>
+{% endblock %}

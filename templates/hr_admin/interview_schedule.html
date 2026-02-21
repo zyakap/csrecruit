@@ -1,0 +1,58 @@
+{% extends 'hr_admin/base.html' %}
+{% block title %}Schedule Interview - {{ application.full_name }}{% endblock %}
+{% block hr_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold mb-0"><i class="bi bi-calendar-plus me-2"></i>Schedule Interview</h4>
+    <a href="{% url 'hr_admin:application_detail' application.pk %}" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+<div class="row">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-pngcs text-white">
+                Interview for: <strong>{{ application.full_name }}</strong>
+                <small class="ms-2 opacity-75">— {{ application.vacancy.title }}</small>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Interview Date & Time *</label>
+                        {{ form.scheduled_date }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Venue *</label>
+                        {{ form.venue }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Panel Members</label>
+                        <div class="border rounded p-2">
+                            {{ form.panel_members }}
+                        </div>
+                        <div class="form-text">Select panel members who will conduct this interview.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Notes</label>
+                        {{ form.notes }}
+                    </div>
+                    <button type="submit" class="btn btn-pngcs">
+                        <i class="bi bi-calendar-check me-2"></i>Schedule & Notify Applicant
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-light"><strong>Applicant Summary</strong></div>
+            <div class="card-body small">
+                <p class="mb-1"><strong>Name:</strong> {{ application.full_name }}</p>
+                <p class="mb-1"><strong>Province:</strong> {{ application.province }}</p>
+                <p class="mb-1"><strong>Qualification:</strong> {{ application.get_highest_qualification_display }}</p>
+                <p class="mb-1"><strong>Score:</strong> {{ application.total_score|default:"Not scored" }}/100</p>
+                <p class="mb-1"><strong>Phone:</strong> {{ application.phone }}</p>
+                <p class="mb-0"><strong>Email:</strong> {{ application.email }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

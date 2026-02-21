@@ -1,0 +1,79 @@
+{% extends 'hr_admin/base.html' %}
+{% block title %}Bulk Messages - HR Admin{% endblock %}
+{% block hr_content %}
+<h4 class="fw-bold mb-4"><i class="bi bi-envelope-fill me-2"></i>Bulk Communication</h4>
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-pngcs text-white"><h6 class="mb-0">Send Message</h6></div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Target Vacancy</label>
+                        {{ form.vacancy }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Target Status</label>
+                        {{ form.recipient_status }}
+                        <div class="form-text">Leave empty to message all applicants for selected vacancy.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Subject *</label>
+                        {{ form.subject }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Message *</label>
+                        {{ form.message }}
+                    </div>
+                    <button type="submit" class="btn btn-pngcs w-100">
+                        <i class="bi bi-send me-2"></i>Send to Applicants
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold">Quick Templates</h6></div>
+            <div class="card-body">
+                <div class="list-group">
+                    <button class="list-group-item list-group-item-action small" onclick="fillTemplate('Interview Reminder', 'Dear Applicant,\n\nThis is a friendly reminder that your interview is scheduled. Please ensure you arrive 15 minutes before your interview time and bring all original documents.\n\nThank you.\nPNGCS HR Team')">
+                        <i class="bi bi-calendar-check me-2 text-primary"></i><strong>Interview Reminder</strong>
+                    </button>
+                    <button class="list-group-item list-group-item-action small" onclick="fillTemplate('Application Acknowledgement', 'Dear Applicant,\n\nWe have received your application and it is currently under review. We will notify you of any updates.\n\nThank you for your interest in joining PNGCS.\n\nHR Team, PNGCS')">
+                        <i class="bi bi-envelope-check me-2 text-success"></i><strong>Acknowledgement</strong>
+                    </button>
+                    <button class="list-group-item list-group-item-action small" onclick="fillTemplate('Request Additional Documents', 'Dear Applicant,\n\nWe require additional documents to complete the review of your application. Please log in to the recruitment portal and upload the following:\n- Certified copy of birth certificate\n- Certified academic transcripts\n\nDeadline: 5 working days.\n\nHR Team, PNGCS')">
+                        <i class="bi bi-file-earmark-plus me-2 text-warning"></i><strong>Request Documents</strong>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold">Message History</h6></div>
+            <div class="card-body p-0">
+                {% for msg in recent %}
+                <div class="border-bottom px-3 py-2">
+                    <strong class="small">{{ msg.subject }}</strong><br>
+                    <small class="text-muted">
+                        {{ msg.sent_at|date:"d M Y H:i" }} | {{ msg.recipient_count }} recipients
+                        {% if msg.vacancy %} | {{ msg.vacancy.title|truncatechars:20 }}{% endif %}
+                    </small>
+                </div>
+                {% empty %}
+                <p class="text-muted small p-3 mb-0">No messages sent yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function fillTemplate(subject, message) {
+    document.querySelector('[name="subject"]').value = subject;
+    document.querySelector('[name="message"]').value = message;
+}
+</script>
+{% endblock %}

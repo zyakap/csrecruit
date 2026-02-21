@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% block title %}Apply - {{ vacancy.title }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'recruitment:job_list' %}">Vacancies</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'recruitment:job_detail' vacancy.pk %}">{{ vacancy.title }}</a></li>
+            <li class="breadcrumb-item active">Apply</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-pngcs">
+                    <h5 class="mb-0 text-white"><i class="bi bi-send me-2"></i>Application Form — {{ vacancy.title }}</h5>
+                    <small class="text-white-50">Ref: {{ vacancy.reference_number }}</small>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" id="applicationForm">
+                        {% csrf_token %}
+
+                        <!-- Section 1: Personal Details -->
+                        <h6 class="fw-bold text-uppercase text-muted mb-3 border-bottom pb-2">
+                            <i class="bi bi-person-fill me-2" style="color: var(--pngcs-blue);"></i>1. Personal Information
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">First Name *</label>
+                                <input type="text" name="first_name" class="form-control" value="{{ form.first_name.value|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Last Name *</label>
+                                <input type="text" name="last_name" class="form-control" value="{{ form.last_name.value|default:'' }}" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Date of Birth *</label>
+                                <input type="date" name="date_of_birth" class="form-control" value="{{ form.date_of_birth.value|date:'Y-m-d'|default:'' }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Gender *</label>
+                                <select name="gender" class="form-select" required>
+                                    <option value="">Select</option>
+                                    <option value="Male" {% if form.gender.value == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if form.gender.value == 'Female' %}selected{% endif %}>Female</option>
+                                    <option value="Other" {% if form.gender.value == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Nationality *</label>
+                                <input type="text" name="nationality" class="form-control" value="{{ form.nationality.value|default:'Papua New Guinean' }}" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Province of Origin *</label>
+                                <select name="province" class="form-select" required>
+                                    <option value="">Select Province</option>
+                                    {% for field in form %}
+                                        {% if field.name == 'province' %}
+                                            {% for val, label in field.field.choices %}
+                                                {% if val %}<option value="{{ val }}" {% if field.value == val %}selected{% endif %}>{{ label }}</option>{% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Phone Number *</label>
+                                <input type="text" name="phone" class="form-control" value="{{ form.phone.value|default:'' }}" required placeholder="+675 XXXX XXXX">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email Address *</label>
+                            <input type="email" name="email" class="form-control" value="{{ form.email.value|default:'' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Residential Address *</label>
+                            <textarea name="address" class="form-control" rows="2" required>{{ form.address.value|default:'' }}</textarea>
+                        </div>
+
+                        <!-- Section 2: Education -->
+                        <h6 class="fw-bold text-uppercase text-muted mb-3 border-bottom pb-2 mt-4">
+                            <i class="bi bi-mortarboard-fill me-2" style="color: var(--pngcs-blue);"></i>2. Education & Qualifications
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Highest Qualification *</label>
+                                <select name="highest_qualification" class="form-select" required>
+                                    <option value="">Select</option>
+                                    {% for field in form %}
+                                        {% if field.name == 'highest_qualification' %}
+                                            {% for val, label in field.field.choices %}
+                                                {% if val %}<option value="{{ val }}" {% if field.value == val %}selected{% endif %}>{{ label }}</option>{% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Year Completed *</label>
+                                <input type="number" name="year_completed" class="form-control" value="{{ form.year_completed.value|default:'' }}" min="1990" max="2026" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Institution / School *</label>
+                                <input type="text" name="institution" class="form-control" value="{{ form.institution.value|default:'' }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Grade / GPA / Result *</label>
+                                <input type="text" name="grade_result" class="form-control" value="{{ form.grade_result.value|default:'' }}" placeholder="e.g. Distinction, GPA 3.5/4.0" required>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Work Experience -->
+                        <h6 class="fw-bold text-uppercase text-muted mb-3 border-bottom pb-2 mt-4">
+                            <i class="bi bi-briefcase-fill me-2" style="color: var(--pngcs-blue);"></i>3. Work Experience
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Years of Experience *</label>
+                                <input type="number" name="years_experience" class="form-control" value="{{ form.years_experience.value|default:'0' }}" min="0" max="50" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Current Employer</label>
+                                <input type="text" name="current_employer" class="form-control" value="{{ form.current_employer.value|default:'' }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Current Position</label>
+                                <input type="text" name="current_position" class="form-control" value="{{ form.current_position.value|default:'' }}">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Work History Summary</label>
+                            <textarea name="work_history" class="form-control" rows="3" placeholder="Briefly describe your previous work experience...">{{ form.work_history.value|default:'' }}</textarea>
+                        </div>
+
+                        <!-- Section 4: References -->
+                        <h6 class="fw-bold text-uppercase text-muted mb-3 border-bottom pb-2 mt-4">
+                            <i class="bi bi-people-fill me-2" style="color: var(--pngcs-blue);"></i>4. References
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Reference 1 Name *</label>
+                                <input type="text" name="reference1_name" class="form-control" value="{{ form.reference1_name.value|default:'' }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Position *</label>
+                                <input type="text" name="reference1_position" class="form-control" value="{{ form.reference1_position.value|default:'' }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Phone *</label>
+                                <input type="text" name="reference1_phone" class="form-control" value="{{ form.reference1_phone.value|default:'' }}" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Reference 2 Name</label>
+                                <input type="text" name="reference2_name" class="form-control" value="{{ form.reference2_name.value|default:'' }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Position</label>
+                                <input type="text" name="reference2_position" class="form-control" value="{{ form.reference2_position.value|default:'' }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Phone</label>
+                                <input type="text" name="reference2_phone" class="form-control" value="{{ form.reference2_phone.value|default:'' }}">
+                            </div>
+                        </div>
+
+                        <!-- Section 5: Cover Letter -->
+                        <h6 class="fw-bold text-uppercase text-muted mb-3 border-bottom pb-2 mt-4">
+                            <i class="bi bi-envelope-fill me-2" style="color: var(--pngcs-blue);"></i>5. Cover Letter
+                        </h6>
+                        <div class="mb-3">
+                            <textarea name="cover_letter" class="form-control" rows="5" placeholder="Write a brief cover letter explaining why you are applying for this position...">{{ form.cover_letter.value|default:'' }}</textarea>
+                        </div>
+
+                        <!-- Section 6: Documents -->
+                        <h6 class="fw-bold text-uppercase text-muted mb-3 border-bottom pb-2 mt-4">
+                            <i class="bi bi-paperclip me-2" style="color: var(--pngcs-blue);"></i>6. Supporting Documents
+                        </h6>
+                        <div id="documentFields">
+                            <div class="document-row row mb-2">
+                                <div class="col-md-5">
+                                    <select name="doc_types" class="form-select form-select-sm">
+                                        <option value="cv">CV</option>
+                                        <option value="national_id">National ID</option>
+                                        <option value="academic_transcript">Academic Transcript</option>
+                                        <option value="qualification">Qualification/Certificate</option>
+                                        <option value="reference_letter">Reference Letter</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-7">
+                                    <input type="file" name="documents" class="form-control form-control-sm">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm mb-3" onclick="addDocField()">
+                            <i class="bi bi-plus me-1"></i>Add Another Document
+                        </button>
+                        <p class="text-muted small"><i class="bi bi-info-circle me-1"></i>Upload PDF, JPG, or PNG files (max 10MB each)</p>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-pngcs btn-lg flex-grow-1">
+                                <i class="bi bi-send-fill me-2"></i>Submit Application
+                            </button>
+                            <a href="{% url 'recruitment:job_detail' vacancy.pk %}" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card sticky-top" style="top: 80px;">
+                <div class="card-header bg-light">
+                    <strong><i class="bi bi-briefcase me-2"></i>{{ vacancy.title }}</strong>
+                </div>
+                <div class="card-body small">
+                    <p class="mb-1"><i class="bi bi-building me-1 text-muted"></i>{{ vacancy.department }}</p>
+                    <p class="mb-1"><i class="bi bi-geo-alt me-1 text-muted"></i>{{ vacancy.province }}</p>
+                    <p class="mb-1"><i class="bi bi-award me-1 text-muted"></i>{{ vacancy.get_qualification_level_display }}</p>
+                    <p class="mb-1 text-danger fw-bold"><i class="bi bi-calendar-x me-1"></i>Closes: {{ vacancy.close_date|date:"d M Y" }}</p>
+                    <hr>
+                    <h6 class="fw-bold text-uppercase text-muted small">Scoring Criteria</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li><i class="bi bi-mortarboard me-1"></i>Education Level: 30%</li>
+                        <li><i class="bi bi-bar-chart me-1"></i>Academic Grade: 25%</li>
+                        <li><i class="bi bi-briefcase me-1"></i>Work Experience: 20%</li>
+                        <li><i class="bi bi-geo me-1"></i>Provincial Origin: 10%</li>
+                        <li><i class="bi bi-check2-all me-1"></i>Form Completeness: 15%</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function addDocField() {
+    const div = document.createElement('div');
+    div.className = 'document-row row mb-2';
+    div.innerHTML = `
+        <div class="col-md-5">
+            <select name="doc_types" class="form-select form-select-sm">
+                <option value="cv">CV</option>
+                <option value="national_id">National ID</option>
+                <option value="academic_transcript">Academic Transcript</option>
+                <option value="qualification">Qualification/Certificate</option>
+                <option value="reference_letter">Reference Letter</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <input type="file" name="documents" class="form-control form-control-sm">
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.parentElement.remove()">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>`;
+    document.getElementById('documentFields').appendChild(div);
+}
+</script>
+{% endblock %}

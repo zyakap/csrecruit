@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}My Applications - PNGCS{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h3 class="fw-bold mb-0" style="color: var(--pngcs-blue);">
+                <i class="bi bi-person-lines-fill me-2"></i>My Application Dashboard
+            </h3>
+            <p class="text-muted small mb-0">Welcome back, {{ request.user.first_name|default:request.user.username }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'recruitment:job_list' %}" class="btn btn-pngcs">
+                <i class="bi bi-briefcase me-2"></i>Browse Vacancies
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Applications -->
+            <div class="card mb-4">
+                <div class="card-header bg-white border-bottom">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-file-text me-2"></i>My Applications ({{ applications|length }})</h6>
+                </div>
+                <div class="card-body p-0">
+                    {% if applications %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Position</th>
+                                    <th>Submitted</th>
+                                    <th>Score</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in applications %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ app.vacancy.title }}</strong><br>
+                                        <small class="text-muted">{{ app.vacancy.department }}</small>
+                                    </td>
+                                    <td><small>{{ app.submitted_at|date:"d M Y" }}</small></td>
+                                    <td>
+                                        {% if app.total_score %}
+                                            <span class="badge {% if app.total_score >= 70 %}bg-success{% elif app.total_score >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                                {{ app.total_score }}/100
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted small">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if app.status == 'submitted' %}<span class="badge bg-secondary">Submitted</span>
+                                        {% elif app.status == 'under_review' %}<span class="badge bg-info text-dark">Under Review</span>
+                                        {% elif app.status == 'shortlisted' %}<span class="badge bg-primary">Shortlisted</span>
+                                        {% elif app.status == 'interview_scheduled' %}<span class="badge bg-warning text-dark">Interview Scheduled</span>
+                                        {% elif app.status == 'interviewed' %}<span class="badge bg-info">Interviewed</span>
+                                        {% elif app.status == 'selected' %}<span class="badge bg-success">Selected</span>
+                                        {% elif app.status == 'rejected' %}<span class="badge bg-danger">Unsuccessful</span>
+                                        {% else %}<span class="badge bg-secondary">{{ app.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'recruitment:application_detail' app.pk %}" class="btn btn-outline-primary btn-sm">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-file-text" style="font-size: 2.5rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2">No applications yet. <a href="{% url 'recruitment:job_list' %}">Browse open vacancies</a></p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Notifications -->
+            <div class="card">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">
+                        <i class="bi bi-bell me-2"></i>Notifications
+                        {% if unread_count %}<span class="badge bg-danger">{{ unread_count }}</span>{% endif %}
+                    </h6>
+                    {% if unread_count %}
+                    <a href="{% url 'recruitment:mark_all_read' %}" class="btn btn-outline-secondary btn-sm">Mark all read</a>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0">
+                    {% if notifications %}
+                        {% for notif in notifications %}
+                        <div class="border-bottom p-3 {% if not notif.read %}bg-light{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="mb-1 fw-semibold small">
+                                        {% if notif.notification_type == 'success' %}<i class="bi bi-check-circle-fill text-success me-1"></i>
+                                        {% elif notif.notification_type == 'warning' %}<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                                        {% elif notif.notification_type == 'interview' %}<i class="bi bi-camera-video-fill text-primary me-1"></i>
+                                        {% else %}<i class="bi bi-info-circle-fill text-info me-1"></i>{% endif %}
+                                        {{ notif.title }}
+                                    </p>
+                                    <p class="text-muted small mb-1">{{ notif.message|truncatewords:20 }}</p>
+                                    <small class="text-muted">{{ notif.created_at|date:"d M Y H:i" }}</small>
+                                </div>
+                                {% if not notif.read %}
+                                <a href="{% url 'recruitment:mark_read' notif.pk %}" class="btn btn-outline-secondary btn-sm ms-2">
+                                    <i class="bi bi-check"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-bell-slash" style="font-size: 1.8rem; color: #ccc;"></i>
+                            <p class="text-muted small mt-2">No notifications</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

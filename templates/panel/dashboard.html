@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Panel Dashboard - PNGCS{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h3 class="fw-bold mb-0" style="color: var(--pngcs-blue);">
+                <i class="bi bi-clipboard-check me-2"></i>Interview Panel Portal
+            </h3>
+            <p class="text-muted small">Welcome, {{ request.user.get_full_name|default:request.user.username }}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-pngcs text-white">
+                    <h6 class="mb-0"><i class="bi bi-calendar3 me-2"></i>Assigned Interviews</h6>
+                </div>
+                <div class="card-body p-0">
+                    {% if interviews %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Applicant</th>
+                                    <th>Position</th>
+                                    <th>Date & Time</th>
+                                    <th>Venue</th>
+                                    <th>Status</th>
+                                    <th>Scored?</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for interview in interviews %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ interview.application.full_name }}</strong><br>
+                                        <small class="text-muted">{{ interview.application.province }}</small>
+                                    </td>
+                                    <td><small>{{ interview.application.vacancy.title }}</small></td>
+                                    <td>
+                                        <strong>{{ interview.scheduled_date|date:"d M Y" }}</strong><br>
+                                        <small>{{ interview.scheduled_date|time:"H:i" }}</small>
+                                    </td>
+                                    <td><small>{{ interview.venue }}</small></td>
+                                    <td>
+                                        {% if interview.status == 'scheduled' %}
+                                            <span class="badge bg-warning text-dark">Scheduled</span>
+                                        {% elif interview.status == 'completed' %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ interview.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if interview.pk in scored_ids %}
+                                            <span class="badge bg-success"><i class="bi bi-check me-1"></i>Scored</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'panel:application_view' interview.pk %}" class="btn btn-pngcs btn-sm">
+                                            {% if interview.pk in scored_ids %}
+                                            <i class="bi bi-eye me-1"></i>View
+                                            {% else %}
+                                            <i class="bi bi-pencil-square me-1"></i>Score
+                                            {% endif %}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-clipboard-x" style="font-size: 3rem; color: #ccc;"></i>
+                        <h5 class="text-muted mt-3">No interviews assigned</h5>
+                        <p class="text-muted">You will see interviews here when HR assigns you to a panel.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

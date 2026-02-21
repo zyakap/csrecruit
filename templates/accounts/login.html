@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Login - PNGCS Recruitment Portal{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header bg-pngcs text-center py-4">
+                    <i class="bi bi-shield-lock-fill" style="font-size: 2rem; color: #FFD700;"></i>
+                    <h4 class="mt-2 mb-0 text-white">Sign In to Portal</h4>
+                    <p class="text-white-50 small mb-0">PNGCS Recruitment Management System</p>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" name="username" class="form-control" placeholder="Enter username" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-pngcs w-100 py-2 fw-bold">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                        </button>
+                    </form>
+                    <hr>
+                    <p class="text-center mb-0">New applicant? <a href="{% url 'accounts:register' %}" class="fw-semibold">Create an account</a></p>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-body py-2 px-3">
+                    <p class="small text-muted mb-1"><strong>Demo Accounts:</strong></p>
+                    <p class="small text-muted mb-0">HR Admin: <code>hradmin / demo1234</code> &nbsp;|&nbsp; Applicant: <code>john.doe / demo1234</code> &nbsp;|&nbsp; Panel: <code>panelist1 / demo1234</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

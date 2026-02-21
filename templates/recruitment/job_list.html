@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Job Vacancies - PNGCS Recruitment Portal{% endblock %}
+{% block content %}
+<!-- Hero Banner -->
+<div class="hero-banner">
+    <div class="container text-center">
+        <h1><i class="bi bi-shield-fill me-3" style="color: #FFD700;"></i>PNGCS Recruitment Portal</h1>
+        <p class="lead mb-4">Papua New Guinea Correctional Service — Join Our Team</p>
+        <form class="row g-2 justify-content-center" method="get">
+            <div class="col-md-5">
+                <input type="text" name="search" class="form-control form-control-lg" placeholder="Search positions..." value="{{ search }}">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-warning btn-lg fw-bold">
+                    <i class="bi bi-search me-1"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container py-4">
+    <!-- Filters Row -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                {% if search %}<input type="hidden" name="search" value="{{ search }}">{% endif %}
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Province</label>
+                    <select name="province" class="form-select form-select-sm">
+                        <option value="">All Provinces</option>
+                        {% for val, label in provinces %}
+                            <option value="{{ val }}" {% if province_filter == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Category</label>
+                    <select name="category" class="form-select form-select-sm">
+                        <option value="">All Categories</option>
+                        {% for val, label in categories %}
+                            <option value="{{ val }}" {% if category_filter == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold small">Qualification</label>
+                    <select name="qualification" class="form-select form-select-sm">
+                        <option value="">All Levels</option>
+                        {% for val, label in qualifications %}
+                            <option value="{{ val }}" {% if qual_filter == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-pngcs btn-sm w-100"><i class="bi bi-funnel me-1"></i>Filter</button>
+                    <a href="{% url 'recruitment:job_list' %}" class="btn btn-outline-secondary btn-sm w-100 mt-1">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h5 class="mb-3 text-muted"><i class="bi bi-briefcase me-2"></i>{{ vacancies|length }} Open Position{{ vacancies|length|pluralize }}</h5>
+
+    {% if vacancies %}
+        {% for vacancy in vacancies %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3 text-center" style="min-width: 48px; min-height: 48px; background: #e8f0fe; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-briefcase-fill" style="font-size: 1.4rem; color: var(--pngcs-blue);"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">
+                                    <a href="{% url 'recruitment:job_detail' vacancy.pk %}" class="text-decoration-none text-dark fw-bold">{{ vacancy.title }}</a>
+                                </h5>
+                                <p class="text-muted small mb-2">
+                                    <i class="bi bi-building me-1"></i>{{ vacancy.department }}
+                                    &nbsp;|&nbsp;<i class="bi bi-geo-alt me-1"></i>{{ vacancy.province }}
+                                    &nbsp;|&nbsp;<i class="bi bi-tag me-1"></i>{{ vacancy.get_category_display }}
+                                </p>
+                                <div>
+                                    <span class="badge bg-primary me-1">{{ vacancy.get_qualification_level_display }}</span>
+                                    <span class="badge bg-success me-1">{{ vacancy.positions_available }} position{{ vacancy.positions_available|pluralize }}</span>
+                                    <span class="badge bg-info text-dark">Ref: {{ vacancy.reference_number }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <p class="text-danger small mb-1 fw-semibold">
+                            <i class="bi bi-calendar-x me-1"></i>Closes: {{ vacancy.close_date|date:"d M Y" }}
+                        </p>
+                        {% if vacancy.salary_range %}
+                        <p class="text-success small mb-2"><i class="bi bi-cash me-1"></i>{{ vacancy.salary_range }}</p>
+                        {% endif %}
+                        <a href="{% url 'recruitment:job_detail' vacancy.pk %}" class="btn btn-pngcs btn-sm">
+                            View & Apply <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+            <h5 class="text-muted mt-3">No open vacancies found</h5>
+            <p class="text-muted">Try adjusting your filters or check back later.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

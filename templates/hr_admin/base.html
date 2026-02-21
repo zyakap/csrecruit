@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2">
+            <div class="sidebar mb-3">
+                <div class="px-3 py-2 border-bottom mb-2">
+                    <small class="text-muted fw-bold text-uppercase">HR Administration</small>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'hr_admin:dashboard' %}">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a class="nav-link {% if 'vacancy' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'hr_admin:vacancy_list' %}">
+                        <i class="bi bi-briefcase"></i> Vacancies
+                    </a>
+                    <a class="nav-link {% if 'application' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'hr_admin:application_list' %}">
+                        <i class="bi bi-file-text"></i> Applications
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'bulk_message' %}active{% endif %}" href="{% url 'hr_admin:bulk_message' %}">
+                        <i class="bi bi-envelope"></i> Bulk Messages
+                    </a>
+                    <a class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}" href="{% url 'hr_admin:reports' %}">
+                        <i class="bi bi-bar-chart"></i> Reports
+                    </a>
+                    <hr class="mx-3">
+                    <a class="nav-link" href="{% url 'recruitment:job_list' %}">
+                        <i class="bi bi-arrow-left"></i> Public Portal
+                    </a>
+                </nav>
+            </div>
+        </div>
+        <!-- Main Content -->
+        <div class="col-md-10">
+            {% block hr_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

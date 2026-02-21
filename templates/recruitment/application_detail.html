@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block title %}Application #{{ application.pk }} - PNGCS{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'recruitment:dashboard' %}">My Dashboard</a></li>
+            <li class="breadcrumb-item active">Application #{{ application.pk }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header bg-pngcs">
+                    <h5 class="mb-0 text-white">Application #{{ application.pk }} — {{ application.vacancy.title }}</h5>
+                    <small class="text-white-50">Ref: {{ application.vacancy.reference_number }}</small>
+                </div>
+                <div class="card-body">
+                    <!-- Progress Tracker -->
+                    <div class="progress-tracker mb-4">
+                        {% with steps='submitted,under_review,shortlisted,interview_scheduled,selected' %}
+                        {% for step in steps.split %}
+                        <div class="progress-step">
+                            <div class="step-circle {% if application.status == step %}active{% elif application.status in 'shortlisted,interview_scheduled,interviewed,selected' and step in 'submitted,under_review' %}completed{% elif application.status == 'selected' and step in 'submitted,under_review,shortlisted,interview_scheduled' %}completed{% endif %}">
+                                {% if step == 'submitted' %}1{% elif step == 'under_review' %}2{% elif step == 'shortlisted' %}3{% elif step == 'interview_scheduled' %}4{% else %}5{% endif %}
+                            </div>
+                            <small class="d-block text-muted" style="font-size: 0.65rem;">{{ step|title|truncatechars:10 }}</small>
+                        </div>
+                        {% endfor %}
+                        {% endwith %}
+                    </div>
+
+                    <h6 class="fw-bold text-uppercase text-muted small border-bottom pb-2">Personal Details</h6>
+                    <div class="row small mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Full Name:</strong> {{ application.full_name }}</p>
+                            <p class="mb-1"><strong>Date of Birth:</strong> {{ application.date_of_birth|date:"d M Y" }}</p>
+                            <p class="mb-1"><strong>Gender:</strong> {{ application.gender }}</p>
+                            <p class="mb-1"><strong>Province:</strong> {{ application.province }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Phone:</strong> {{ application.phone }}</p>
+                            <p class="mb-1"><strong>Email:</strong> {{ application.email }}</p>
+                            <p class="mb-1"><strong>Nationality:</strong> {{ application.nationality }}</p>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-uppercase text-muted small border-bottom pb-2">Education</h6>
+                    <div class="row small mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Qualification:</strong> {{ application.get_highest_qualification_display }}</p>
+                            <p class="mb-1"><strong>Institution:</strong> {{ application.institution }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Year Completed:</strong> {{ application.year_completed }}</p>
+                            <p class="mb-1"><strong>Grade/Result:</strong> {{ application.grade_result }}</p>
+                        </div>
+                    </div>
+
+                    {% if interviews %}
+                    <h6 class="fw-bold text-uppercase text-muted small border-bottom pb-2">Interview Schedule</h6>
+                    {% for interview in interviews %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-camera-video-fill me-2"></i>
+                        <strong>{{ interview.scheduled_date|date:"l, d F Y" }} at {{ interview.scheduled_date|time:"H:i" }}</strong><br>
+                        <small>Venue: {{ interview.venue }}</small><br>
+                        <span class="badge bg-{{ interview.status|lower }}">{{ interview.get_status_display }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-paperclip me-2"></i>Uploaded Documents</h6>
+                </div>
+                <div class="card-body">
+                    {% if documents %}
+                    <div class="list-group list-group-flush">
+                        {% for doc in documents %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-file-earmark-pdf me-2 text-danger"></i>
+                                <strong>{{ doc.get_doc_type_display }}</strong>
+                                <small class="text-muted ms-2">{{ doc.uploaded_at|date:"d M Y" }}</small>
+                            </div>
+                            {% if doc.verified %}
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Verified</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Pending</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted small mb-0">No documents uploaded yet.</p>
+                    {% endif %}
+
+                    <hr>
+                    <h6 class="fw-semibold small">Upload Additional Documents</h6>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-5">
+                                <select name="doc_types" class="form-select form-select-sm">
+                                    <option value="cv">CV</option>
+                                    <option value="national_id">National ID</option>
+                                    <option value="academic_transcript">Academic Transcript</option>
+                                    <option value="qualification">Qualification/Certificate</option>
+                                    <option value="reference_letter">Reference Letter</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <input type="file" name="documents" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-pngcs btn-sm w-100">Upload</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <strong>Application Status</strong>
+                </div>
+                <div class="card-body text-center">
+                    {% if application.status == 'submitted' %}
+                        <i class="bi bi-clock-fill text-secondary" style="font-size: 2.5rem;"></i>
+                        <h5 class="mt-2">Submitted</h5>
+                        <p class="text-muted small">Your application has been received and is awaiting review.</p>
+                    {% elif application.status == 'under_review' %}
+                        <i class="bi bi-search text-info" style="font-size: 2.5rem;"></i>
+                        <h5 class="mt-2">Under Review</h5>
+                        <p class="text-muted small">Our HR team is currently reviewing your application.</p>
+                    {% elif application.status == 'shortlisted' %}
+                        <i class="bi bi-star-fill text-primary" style="font-size: 2.5rem;"></i>
+                        <h5 class="mt-2">Shortlisted!</h5>
+                        <p class="text-muted small">Congratulations! You have been shortlisted. Watch for interview details.</p>
+                    {% elif application.status == 'interview_scheduled' %}
+                        <i class="bi bi-calendar-check-fill text-warning" style="font-size: 2.5rem;"></i>
+                        <h5 class="mt-2">Interview Scheduled</h5>
+                        <p class="text-muted small">Please check your interview details and arrive 15 minutes early.</p>
+                    {% elif application.status == 'selected' %}
+                        <i class="bi bi-trophy-fill text-success" style="font-size: 2.5rem;"></i>
+                        <h5 class="mt-2">Selected!</h5>
+                        <p class="text-muted small">Congratulations! You have been selected for this position.</p>
+                    {% elif application.status == 'rejected' %}
+                        <i class="bi bi-x-circle-fill text-danger" style="font-size: 2.5rem;"></i>
+                        <h5 class="mt-2">Unsuccessful</h5>
+                        <p class="text-muted small">Thank you for applying. You may apply for other positions.</p>
+                    {% else %}
+                        <h5>{{ application.get_status_display }}</h5>
+                    {% endif %}
+                    <hr>
+                    <p class="small text-muted mb-0">Submitted: {{ application.submitted_at|date:"d M Y H:i" }}</p>
+                    {% if application.total_score %}
+                    <p class="small text-muted mt-1">AI Score: <strong>{{ application.total_score }}/100</strong></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

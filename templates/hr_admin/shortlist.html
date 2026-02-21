@@ -1,0 +1,131 @@
+{% extends 'hr_admin/base.html' %}
+{% block title %}Shortlist - {{ vacancy.title }}{% endblock %}
+{% block hr_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold mb-0"><i class="bi bi-star me-2"></i>Shortlisting — {{ vacancy.title }}</h4>
+    <div class="d-flex gap-2">
+        <a href="{% url 'hr_admin:export_shortlist' vacancy.pk %}" class="btn btn-success btn-sm">
+            <i class="bi bi-download me-1"></i>Export Excel
+        </a>
+        <a href="{% url 'hr_admin:vacancy_list' %}" class="btn btn-outline-secondary btn-sm">Back</a>
+    </div>
+</div>
+
+<!-- Threshold Filter -->
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-auto">
+                <label class="form-label small fw-semibold mb-0">Minimum Score Threshold:</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" name="threshold" class="form-control" value="{{ threshold }}" min="0" max="100">
+                    <button type="submit" class="btn btn-pngcs">Apply</button>
+                </div>
+            </div>
+            <div class="col">
+                <span class="badge bg-success ms-2">{{ qualified|length }} Qualified</span>
+                <span class="badge bg-danger ms-1">{{ below_threshold|length }} Below Threshold</span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header bg-success text-white">
+        <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Qualified Applicants (Score ≥ {{ threshold }})</h6>
+    </div>
+    <div class="card-body p-0">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="shortlist">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th><input type="checkbox" id="checkAll" class="form-check-input"></th>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Province</th>
+                            <th>Qualification</th>
+                            <th>Grade</th>
+                            <th>Experience</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in qualified %}
+                        <tr>
+                            <td><input type="checkbox" name="selected_ids" value="{{ app.pk }}" class="form-check-input app-check"
+                                {% if app.status == 'shortlisted' or app.status == 'selected' %}checked{% endif %}></td>
+                            <td><strong>{{ forloop.counter }}</strong></td>
+                            <td>
+                                <a href="{% url 'hr_admin:application_detail' app.pk %}" class="text-decoration-none">
+                                    <strong>{{ app.full_name }}</strong>
+                                </a><br>
+                                <small class="text-muted">{{ app.email }}</small>
+                            </td>
+                            <td><small>{{ app.province }}</small></td>
+                            <td><small>{{ app.get_highest_qualification_display }}</small></td>
+                            <td><small>{{ app.grade_result }}</small></td>
+                            <td><small>{{ app.years_experience }} yr(s)</small></td>
+                            <td>
+                                <span class="badge {% if app.total_score >= 70 %}bg-success{% elif app.total_score >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                    {{ app.total_score }}
+                                </span>
+                            </td>
+                            <td><span class="badge bg-secondary">{{ app.get_status_display }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="9" class="text-center text-muted py-3">No qualified applicants above threshold.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if qualified %}
+            <div class="p-3 border-top bg-light">
+                <button type="submit" class="btn btn-success"
+                        onclick="return confirm('Shortlist selected applicants and notify them? Others will be marked as rejected.')">
+                    <i class="bi bi-star-fill me-2"></i>Confirm Shortlist & Notify Applicants
+                </button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+{% if below_threshold %}
+<div class="card">
+    <div class="card-header bg-light">
+        <h6 class="mb-0 text-muted"><i class="bi bi-x-circle me-2"></i>Below Threshold (Score &lt; {{ threshold }})</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm mb-0">
+                <thead class="table-light">
+                    <tr><th>Name</th><th>Province</th><th>Qualification</th><th>Score</th></tr>
+                </thead>
+                <tbody>
+                    {% for app in below_threshold %}
+                    <tr class="text-muted">
+                        <td>{{ app.full_name }}</td>
+                        <td>{{ app.province }}</td>
+                        <td>{{ app.get_highest_qualification_display }}</td>
+                        <td><span class="badge bg-danger">{{ app.total_score }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('checkAll').addEventListener('change', function() {
+    document.querySelectorAll('.app-check').forEach(cb => cb.checked = this.checked);
+});
+</script>
+{% endblock %}

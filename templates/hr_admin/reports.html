@@ -1,0 +1,159 @@
+{% extends 'hr_admin/base.html' %}
+{% block title %}Reports - HR Admin{% endblock %}
+{% block hr_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="bi bi-bar-chart me-2"></i>Reports & Analytics</h4>
+</div>
+
+<!-- Filter -->
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <select name="vacancy" class="form-select form-select-sm">
+                    <option value="">All Vacancies</option>
+                    {% for v in vacancies %}
+                    <option value="{{ v.pk }}" {% if vacancy_filter == v.pk|stringformat:'s' %}selected{% endif %}>{{ v.title|truncatechars:40 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-pngcs">Apply Filter</button>
+                <a href="{% url 'hr_admin:reports' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center border-0 bg-primary text-white">
+            <div class="card-body">
+                <h2 class="fw-bold">{{ total_applications }}</h2>
+                <p class="small mb-0">Total Applications</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-0 bg-success text-white">
+            <div class="card-body">
+                <h2 class="fw-bold">{{ avg_score|floatformat:1|default:'N/A' }}</h2>
+                <p class="small mb-0">Average AI Score</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-0 bg-info text-white">
+            <div class="card-body">
+                <h2 class="fw-bold">{{ by_province|length }}</h2>
+                <p class="small mb-0">Provinces Represented</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-0 bg-warning">
+            <div class="card-body">
+                <h2 class="fw-bold">{{ by_gender|length }}</h2>
+                <p class="small mb-0">Gender Groups</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold">Applications by Province</h6></div>
+            <div class="card-body"><canvas id="provinceChart" height="220"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold">Gender Distribution</h6></div>
+            <div class="card-body p-0">
+                {% for g in by_gender %}
+                <div class="d-flex justify-content-between px-3 py-2 border-bottom">
+                    <span class="small"><i class="bi bi-person me-1"></i>{{ g.gender|default:'Unspecified' }}</span>
+                    <span class="badge bg-info text-dark">{{ g.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold">Application Status</h6></div>
+            <div class="card-body p-0">
+                {% for s in by_status %}
+                <div class="d-flex justify-content-between px-3 py-2 border-bottom">
+                    <span class="small">{{ s.status|title }}</span>
+                    <span class="badge bg-secondary">{{ s.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold">Applications by Qualification</h6></div>
+            <div class="card-body p-0">
+                {% for q in by_qualification %}
+                <div class="d-flex justify-content-between px-3 py-2 border-bottom">
+                    <span class="small">{{ q.highest_qualification|title }}</span>
+                    <span class="badge bg-primary">{{ q.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold">Provincial Distribution</h6></div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light"><tr><th>Province</th><th>Count</th><th>Share</th></tr></thead>
+                        <tbody>
+                        {% for p in by_province %}
+                        <tr>
+                            <td class="small">{{ p.province }}</td>
+                            <td><span class="badge bg-primary">{{ p.count }}</span></td>
+                            <td>
+                                <div class="progress" style="height: 6px; width: 80px;">
+                                    <div class="progress-bar bg-primary" style="width: {% widthratio p.count total_applications 100 %}%"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ctx = document.getElementById('provinceChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {{ province_labels|safe }},
+        datasets: [{
+            label: 'Applications',
+            data: {{ province_counts|safe }},
+            backgroundColor: ['#003087','#0066cc','#28a745','#ffc107','#17a2b8','#dc3545','#6c757d','#fd7e14','#6f42c1','#20c997'],
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+</script>
+{% endblock %}
