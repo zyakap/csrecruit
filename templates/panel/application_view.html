@@ -1,134 +1,392 @@
 {% extends 'base.html' %}
-{% block title %}Interview Scoring - PNGCS{% endblock %}
+{% load static %}
+
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold mb-0"><i class="bi bi-clipboard-check me-2"></i>Interview Assessment</h4>
-        <a href="{% url 'panel:dashboard' %}" class="btn btn-outline-secondary btn-sm">Back</a>
-    </div>
+<div class="container" style="padding-top:28px;padding-bottom:48px;">
 
-    <div class="row g-3">
-        <div class="col-md-6">
-            <div class="card mb-3">
-                <div class="card-header bg-pngcs text-white">
-                    <h6 class="mb-0">Applicant Profile</h6>
-                </div>
-                <div class="card-body small">
-                    <div class="row">
-                        <div class="col-6">
-                            <p class="mb-1"><strong>Name:</strong> {{ application.full_name }}</p>
-                            <p class="mb-1"><strong>Gender:</strong> {{ application.gender }}</p>
-                            <p class="mb-1"><strong>Province:</strong> {{ application.province }}</p>
-                            <p class="mb-1"><strong>Phone:</strong> {{ application.phone }}</p>
-                        </div>
-                        <div class="col-6">
-                            <p class="mb-1"><strong>Qualification:</strong> {{ application.get_highest_qualification_display }}</p>
-                            <p class="mb-1"><strong>Institution:</strong> {{ application.institution }}</p>
-                            <p class="mb-1"><strong>Grade:</strong> {{ application.grade_result }}</p>
-                            <p class="mb-1"><strong>Experience:</strong> {{ application.years_experience }} yr(s)</p>
-                        </div>
+  <!-- Header -->
+  <div class="row" style="margin-bottom:20px;align-items:center;">
+    <div class="col s12 m8">
+      <h5 style="color:#003087;font-weight:700;margin:0;">
+        <i class="material-icons" style="vertical-align:middle;margin-right:8px;">how_to_vote</i>
+        {{ interview.application.full_name }}
+      </h5>
+      <p style="color:#666;margin:4px 0 0;">
+        Interview for <strong>{{ interview.application.vacancy.title }}</strong>
+        &bull; {{ interview.scheduled_at|date:"d M Y" }} at {{ interview.scheduled_at|time:"H:i" }}
+        {% if interview.venue %}&bull; {{ interview.venue }}{% endif %}
+      </p>
+    </div>
+    <div class="col s12 m4" style="text-align:right;">
+      <a href="{% url 'panel:dashboard' %}" class="btn-flat" style="color:#003087;">
+        <i class="material-icons left">arrow_back</i>Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- LEFT COL: Applicant Profile + Documents -->
+    <div class="col s12 m6">
+
+      <!-- Applicant Profile Card -->
+      <div class="card" style="border-radius:8px;margin-bottom:16px;">
+        <div class="card-content">
+          <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+            <i class="material-icons tiny">person</i> Applicant Profile
+          </span>
+          <table style="font-size:13px;width:100%;">
+            <tbody>
+              <tr>
+                <td style="color:#888;font-weight:600;padding:6px 0;width:40%;">Full Name</td>
+                <td style="font-weight:700;">{{ interview.application.full_name }}</td>
+              </tr>
+              <tr>
+                <td style="color:#888;font-weight:600;padding:6px 0;">Gender</td>
+                <td>{{ interview.application.get_gender_display|default:"—" }}</td>
+              </tr>
+              <tr>
+                <td style="color:#888;font-weight:600;padding:6px 0;">Date of Birth</td>
+                <td>{{ interview.application.date_of_birth|date:"d M Y"|default:"—" }}</td>
+              </tr>
+              <tr>
+                <td style="color:#888;font-weight:600;padding:6px 0;">Province</td>
+                <td>{{ interview.application.province }}</td>
+              </tr>
+              <tr>
+                <td style="color:#888;font-weight:600;padding:6px 0;">Qualification</td>
+                <td>
+                  <span class="chip" style="background:#e3eaf6;color:#003087;font-size:11px;">
+                    {{ interview.application.get_qualification_display }}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td style="color:#888;font-weight:600;padding:6px 0;">Institution</td>
+                <td>{{ interview.application.institution|default:"—" }}</td>
+              </tr>
+              <tr>
+                <td style="color:#888;font-weight:600;padding:6px 0;">Field of Study</td>
+                <td>{{ interview.application.field_of_study|default:"—" }}</td>
+              </tr>
+              <tr>
+                <td style="color:#888;font-weight:600;padding:6px 0;">Graduation Year</td>
+                <td>{{ interview.application.graduation_year|default:"—" }}</td>
+              </tr>
+              <tr>
+                <td style="color:#888;font-weight:600;padding:6px 0;">Experience</td>
+                <td>{{ interview.application.years_experience|default:"0" }} year{{ interview.application.years_experience|pluralize }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- AI Summary Box -->
+      {% if interview.application.ai_summary %}
+        <div class="ai-summary-box" style="background:linear-gradient(135deg,#e8f4fd,#f0e8ff);border-left:4px solid #003087;border-radius:8px;padding:16px 20px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <i class="material-icons" style="color:#003087;font-size:20px;">smart_toy</i>
+            <strong style="color:#003087;font-size:14px;">AI Screening Summary</strong>
+            <span class="chip" style="background:#003087;color:#fff;font-size:10px;margin-left:auto;">Auto-generated</span>
+          </div>
+          <p style="font-size:13px;line-height:1.7;color:#333;margin:0;white-space:pre-line;">
+            {{ interview.application.ai_summary }}
+          </p>
+        </div>
+      {% endif %}
+
+      <!-- Cover Letter -->
+      {% if interview.application.cover_letter %}
+        <div class="card" style="border-radius:8px;margin-bottom:16px;">
+          <div class="card-content">
+            <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+              <i class="material-icons tiny">edit_note</i> Cover Letter
+            </span>
+            <p style="font-size:13px;line-height:1.8;white-space:pre-line;color:#333;">
+              {{ interview.application.cover_letter }}
+            </p>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Documents -->
+      <div class="card" style="border-radius:8px;">
+        <div class="card-content">
+          <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+            <i class="material-icons tiny">attach_file</i> Documents
+          </span>
+          {% if interview.application.documents.all %}
+            <ul class="collection" style="border:none;margin:0;">
+              {% for doc in interview.application.documents.all %}
+                <li class="collection-item" style="padding:10px 0;display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <i class="material-icons" style="color:#003087;">insert_drive_file</i>
+                    <div>
+                      <div style="font-weight:600;font-size:13px;">{{ doc.get_document_type_display }}</div>
+                      <div style="font-size:11px;color:#888;">
+                        {% if doc.is_verified %}
+                          <span style="color:#2e7d32;"><i class="material-icons tiny">verified</i> Verified</span>
+                        {% else %}
+                          <span style="color:#e65100;">Unverified</span>
+                        {% endif %}
+                      </div>
                     </div>
-                    {% if application.ai_summary %}
-                    <div class="alert alert-info mt-2 mb-0 small">
-                        <i class="bi bi-robot me-2"></i><strong>AI Summary:</strong> {{ application.ai_summary }}
-                    </div>
-                    {% endif %}
-                    {% if application.cover_letter %}
-                    <hr>
-                    <strong>Cover Letter:</strong>
-                    <p class="small mt-1">{{ application.cover_letter }}</p>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold">Documents</h6></div>
-                <div class="card-body p-0">
-                    {% for doc in documents %}
-                    <div class="border-bottom px-3 py-2 d-flex justify-content-between">
-                        <span class="small"><i class="bi bi-file-earmark me-1"></i>{{ doc.get_doc_type_display }}</span>
-                        <a href="{{ doc.file.url }}" target="_blank" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-eye"></i></a>
-                    </div>
-                    {% empty %}
-                    <p class="text-muted small p-3 mb-0">No documents.</p>
-                    {% endfor %}
-                </div>
-            </div>
+                  </div>
+                  <a href="{{ doc.file.url }}" target="_blank"
+                     class="btn-small" style="background:#003087;padding:0 10px;">
+                    <i class="material-icons" style="font-size:14px;">open_in_new</i>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p style="color:#aaa;text-align:center;font-style:italic;padding:16px;">No documents uploaded.</p>
+          {% endif %}
+        </div>
+      </div>
+
+    </div><!-- /left col -->
+
+    <!-- RIGHT COL: Interview Score Card -->
+    <div class="col s12 m6">
+      <div class="card" style="border-radius:8px;position:sticky;top:80px;">
+
+        <!-- Card Header -->
+        <div style="background:#003087;border-radius:8px 8px 0 0;padding:16px 20px;color:#fff;">
+          <div style="font-weight:700;font-size:16px;margin-bottom:4px;">
+            <i class="material-icons tiny">rate_review</i> Interview Score Card
+          </div>
+          <div style="font-size:12px;opacity:0.85;">
+            <i class="material-icons tiny">calendar_today</i> {{ interview.scheduled_at|date:"d M Y H:i" }}
+            {% if interview.venue %}
+              &bull; <i class="material-icons tiny">place</i> {{ interview.venue }}
+            {% endif %}
+          </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-pngcs text-white">
-                    <h6 class="mb-0"><i class="bi bi-star me-2"></i>Interview Score Card</h6>
-                    <small class="opacity-75">{{ interview.scheduled_date|date:"d M Y" }} | {{ interview.venue }}</small>
-                </div>
-                <div class="card-body">
-                    {% if existing_score %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle me-2"></i><strong>Score already submitted.</strong>
-                        Total: {{ existing_score.score }}/100 | {{ existing_score.get_recommendation_display }}
-                    </div>
-                    <table class="table table-sm">
-                        <tr><td>Communication Skills</td><td><strong>{{ existing_score.communication_score }}/20</strong></td></tr>
-                        <tr><td>Job Knowledge</td><td><strong>{{ existing_score.knowledge_score }}/30</strong></td></tr>
-                        <tr><td>Attitude & Professionalism</td><td><strong>{{ existing_score.attitude_score }}/25</strong></td></tr>
-                        <tr><td>Relevant Experience</td><td><strong>{{ existing_score.experience_score }}/25</strong></td></tr>
-                        <tr class="table-success"><td><strong>Total Score</strong></td><td><strong>{{ existing_score.score }}/100</strong></td></tr>
-                    </table>
-                    {% if existing_score.comments %}
-                    <p class="small"><strong>Comments:</strong> {{ existing_score.comments }}</p>
-                    {% endif %}
-                    {% else %}
-                    <form method="post" id="scoreForm">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">{{ form.communication_score.label }}</label>
-                            {{ form.communication_score }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">{{ form.knowledge_score.label }}</label>
-                            {{ form.knowledge_score }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">{{ form.attitude_score.label }}</label>
-                            {{ form.attitude_score }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">{{ form.experience_score.label }}</label>
-                            {{ form.experience_score }}
-                        </div>
-                        <div class="alert alert-info py-2">
-                            <strong>Calculated Total: <span id="totalScore">0</span>/100</strong>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Recommendation</label>
-                            {{ form.recommendation }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Panel Comments</label>
-                            {{ form.comments }}
-                        </div>
-                        <button type="submit" class="btn btn-pngcs w-100"
-                                onclick="return confirm('Submit your interview score? This cannot be changed.')">
-                            <i class="bi bi-check-circle me-2"></i>Submit Score
-                        </button>
-                    </form>
-                    {% endif %}
-                </div>
+        <div class="card-content">
+          {% if existing_score %}
+            <!-- Submitted Score View -->
+            <div style="background:#e8f5e9;border-radius:6px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+              <i class="material-icons" style="color:#2e7d32;">check_circle</i>
+              <div style="font-weight:600;color:#2e7d32;font-size:14px;">Score submitted successfully</div>
             </div>
+
+            <table class="striped" style="font-size:13px;width:100%;">
+              <thead style="background:#f5f6fa;">
+                <tr>
+                  <th style="color:#003087;">Criterion</th>
+                  <th style="color:#003087;text-align:center;">Score</th>
+                  <th style="color:#003087;text-align:center;">Max</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Communication Skills</td>
+                  <td style="text-align:center;font-weight:700;">{{ existing_score.communication }}</td>
+                  <td style="text-align:center;color:#888;">20</td>
+                </tr>
+                <tr>
+                  <td>Knowledge &amp; Technical Competency</td>
+                  <td style="text-align:center;font-weight:700;">{{ existing_score.knowledge }}</td>
+                  <td style="text-align:center;color:#888;">30</td>
+                </tr>
+                <tr>
+                  <td>Attitude &amp; Interpersonal Skills</td>
+                  <td style="text-align:center;font-weight:700;">{{ existing_score.attitude }}</td>
+                  <td style="text-align:center;color:#888;">25</td>
+                </tr>
+                <tr>
+                  <td>Relevant Experience</td>
+                  <td style="text-align:center;font-weight:700;">{{ existing_score.experience }}</td>
+                  <td style="text-align:center;color:#888;">25</td>
+                </tr>
+                <tr style="background:#003087;">
+                  <td style="color:#fff;font-weight:700;border-radius:0;">TOTAL</td>
+                  <td style="text-align:center;color:#fff;font-weight:800;font-size:18px;">{{ existing_score.total }}</td>
+                  <td style="text-align:center;color:#90bff9;font-weight:700;">100</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="margin-top:16px;">
+              <div style="font-weight:600;color:#003087;margin-bottom:6px;font-size:13px;">Recommendation</div>
+              <span class="chip"
+                style="{% if existing_score.recommendation == 'recommend' %}background:#e8f5e9;color:#2e7d32;{% elif existing_score.recommendation == 'reserve' %}background:#fff3e0;color:#e65100;{% else %}background:#ffebee;color:#c62828;{% endif %}font-size:13px;">
+                {{ existing_score.get_recommendation_display }}
+              </span>
+            </div>
+
+            {% if existing_score.comments %}
+              <div style="margin-top:14px;">
+                <div style="font-weight:600;color:#003087;margin-bottom:6px;font-size:13px;">Comments</div>
+                <p style="font-size:13px;color:#555;background:#f9f9f9;border-radius:4px;padding:10px;margin:0;line-height:1.7;">
+                  {{ existing_score.comments }}
+                </p>
+              </div>
+            {% endif %}
+
+          {% else %}
+            <!-- Score Entry Form -->
+            <form method="post" action="" id="score-form">
+              {% csrf_token %}
+
+              <p style="font-size:12px;color:#888;margin-bottom:16px;">
+                Score each criterion honestly based on the applicant's interview performance.
+              </p>
+
+              <!-- Communication /20 -->
+              <div class="input-field">
+                <input type="number" id="id_communication" name="communication"
+                       min="0" max="20" step="1"
+                       value="{{ form.communication.value|default:'' }}"
+                       class="{% if form.communication.errors %}invalid{% endif %}"
+                       oninput="updateTotal()" required>
+                <label for="id_communication">Communication Skills (0–20) *</label>
+                {% if form.communication.errors %}
+                  <span class="helper-text red-text">{{ form.communication.errors|join:", " }}</span>
+                {% endif %}
+              </div>
+
+              <!-- Knowledge /30 -->
+              <div class="input-field">
+                <input type="number" id="id_knowledge" name="knowledge"
+                       min="0" max="30" step="1"
+                       value="{{ form.knowledge.value|default:'' }}"
+                       class="{% if form.knowledge.errors %}invalid{% endif %}"
+                       oninput="updateTotal()" required>
+                <label for="id_knowledge">Knowledge &amp; Technical Competency (0–30) *</label>
+                {% if form.knowledge.errors %}
+                  <span class="helper-text red-text">{{ form.knowledge.errors|join:", " }}</span>
+                {% endif %}
+              </div>
+
+              <!-- Attitude /25 -->
+              <div class="input-field">
+                <input type="number" id="id_attitude" name="attitude"
+                       min="0" max="25" step="1"
+                       value="{{ form.attitude.value|default:'' }}"
+                       class="{% if form.attitude.errors %}invalid{% endif %}"
+                       oninput="updateTotal()" required>
+                <label for="id_attitude">Attitude &amp; Interpersonal Skills (0–25) *</label>
+                {% if form.attitude.errors %}
+                  <span class="helper-text red-text">{{ form.attitude.errors|join:", " }}</span>
+                {% endif %}
+              </div>
+
+              <!-- Experience /25 -->
+              <div class="input-field">
+                <input type="number" id="id_experience" name="experience"
+                       min="0" max="25" step="1"
+                       value="{{ form.experience.value|default:'' }}"
+                       class="{% if form.experience.errors %}invalid{% endif %}"
+                       oninput="updateTotal()" required>
+                <label for="id_experience">Relevant Experience (0–25) *</label>
+                {% if form.experience.errors %}
+                  <span class="helper-text red-text">{{ form.experience.errors|join:", " }}</span>
+                {% endif %}
+              </div>
+
+              <!-- Live Total Display -->
+              <div id="total-display"
+                   style="background:#f5f6fa;border-radius:6px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-weight:600;color:#003087;font-size:15px;">Total:</span>
+                <span id="total-value"
+                      style="font-size:2rem;font-weight:800;color:#003087;transition:color 0.3s;">
+                  0<span style="font-size:1rem;font-weight:400;color:#888;">/100</span>
+                </span>
+              </div>
+
+              <!-- Recommendation -->
+              <div class="input-field">
+                <select id="id_recommendation" name="recommendation" required>
+                  <option value="" disabled selected>Select recommendation</option>
+                  <option value="recommend" {% if form.recommendation.value == 'recommend' %}selected{% endif %}>Recommend for Appointment</option>
+                  <option value="reserve" {% if form.recommendation.value == 'reserve' %}selected{% endif %}>Reserve (Consider if Vacancy)</option>
+                  <option value="not_recommend" {% if form.recommendation.value == 'not_recommend' %}selected{% endif %}>Do Not Recommend</option>
+                </select>
+                <label for="id_recommendation">Recommendation *</label>
+                {% if form.recommendation.errors %}
+                  <span class="helper-text red-text">{{ form.recommendation.errors|join:", " }}</span>
+                {% endif %}
+              </div>
+
+              <!-- Comments -->
+              <div class="input-field">
+                <textarea id="id_comments" name="comments"
+                          class="materialize-textarea"
+                          style="min-height:80px;">{{ form.comments.value|default:'' }}</textarea>
+                <label for="id_comments">Comments / Observations</label>
+              </div>
+
+              <div class="section-divider" style="border-top:1px solid #eee;margin:8px 0 16px;"></div>
+
+              <button type="button" class="btn" style="background:#003087;width:100%;"
+                      onclick="confirmSubmit()">
+                <i class="material-icons left">send</i>Submit Score
+              </button>
+              <p style="font-size:11px;color:#aaa;text-align:center;margin-top:8px;">
+                Scores cannot be edited after submission. Review carefully before submitting.
+              </p>
+            </form>
+          {% endif %}
         </div>
-    </div>
+      </div>
+    </div><!-- /right col -->
+  </div>
+
 </div>
 {% endblock %}
+
 {% block extra_js %}
 <script>
-function updateTotal() {
-    const comm = parseFloat(document.querySelector('[name="communication_score"]')?.value || 0);
-    const know = parseFloat(document.querySelector('[name="knowledge_score"]')?.value || 0);
-    const att = parseFloat(document.querySelector('[name="attitude_score"]')?.value || 0);
-    const exp = parseFloat(document.querySelector('[name="experience_score"]')?.value || 0);
-    document.getElementById('totalScore').textContent = (comm + know + att + exp).toFixed(1);
-}
-document.querySelectorAll('input[type="number"]').forEach(el => el.addEventListener('input', updateTotal));
-updateTotal();
+  document.addEventListener('DOMContentLoaded', function () {
+    var selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+    M.updateTextFields();
+    updateTotal();
+  });
+
+  function updateTotal() {
+    var comm = parseInt(document.getElementById('id_communication')?.value) || 0;
+    var know = parseInt(document.getElementById('id_knowledge')?.value) || 0;
+    var att  = parseInt(document.getElementById('id_attitude')?.value) || 0;
+    var exp  = parseInt(document.getElementById('id_experience')?.value) || 0;
+
+    var total = comm + know + att + exp;
+    var totalEl = document.getElementById('total-value');
+    if (!totalEl) return;
+
+    totalEl.innerHTML = total + '<span style="font-size:1rem;font-weight:400;color:#888;">/100</span>';
+
+    if (total >= 70) {
+      totalEl.style.color = '#2e7d32';
+    } else if (total >= 50) {
+      totalEl.style.color = '#e65100';
+    } else {
+      totalEl.style.color = total > 0 ? '#c62828' : '#003087';
+    }
+  }
+
+  function confirmSubmit() {
+    var comm = parseInt(document.getElementById('id_communication')?.value) || 0;
+    var know = parseInt(document.getElementById('id_knowledge')?.value) || 0;
+    var att  = parseInt(document.getElementById('id_attitude')?.value) || 0;
+    var exp  = parseInt(document.getElementById('id_experience')?.value) || 0;
+    var total = comm + know + att + exp;
+
+    // Validate ranges
+    if (comm < 0 || comm > 20) { M.toast({ html: 'Communication must be between 0 and 20.', classes: 'red darken-3' }); return; }
+    if (know < 0 || know > 30) { M.toast({ html: 'Knowledge must be between 0 and 30.', classes: 'red darken-3' }); return; }
+    if (att  < 0 || att  > 25) { M.toast({ html: 'Attitude must be between 0 and 25.', classes: 'red darken-3' }); return; }
+    if (exp  < 0 || exp  > 25) { M.toast({ html: 'Experience must be between 0 and 25.', classes: 'red darken-3' }); return; }
+
+    var rec = document.getElementById('id_recommendation')?.value;
+    if (!rec) { M.toast({ html: 'Please select a recommendation.', classes: 'red darken-3' }); return; }
+
+    if (confirm('Submit score of ' + total + '/100 for {{ interview.application.full_name|escapejs }}?\n\nThis cannot be changed after submission.')) {
+      document.getElementById('score-form').submit();
+    }
+  }
 </script>
 {% endblock %}
