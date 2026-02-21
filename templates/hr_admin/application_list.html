@@ -4,7 +4,7 @@
 {% block hr_content %}
 <!-- Header -->
 <div class="row" style="margin-bottom:8px;align-items:center;">
-  <div class="col s12">
+  <div class="col s12 m8">
     <h5 style="color:#003087;font-weight:700;margin:0;">
       <i class="material-icons" style="vertical-align:middle;margin-right:8px;">inbox</i>
       Applications Inbox
@@ -12,6 +12,23 @@
     <p style="color:#666;margin:4px 0 0;">
       Showing {{ applications.paginator.count|default:"0" }} application{{ applications.paginator.count|pluralize }}
     </p>
+  </div>
+  <div class="col s12 m4 right-align" style="padding-top:8px;">
+    {% if request.GET.vacancy %}
+      <a href="{% url 'hr_admin:bulk_ocr_vacancy' request.GET.vacancy %}"
+         class="btn teal waves-effect waves-light tooltipped"
+         data-position="bottom"
+         data-tooltip="Run OCR on all documents for all applications in this vacancy and generate summaries">
+        <i class="material-icons left">document_scanner</i>Bulk OCR — This Vacancy
+      </a>
+    {% else %}
+      <span class="tooltipped" data-position="bottom"
+            data-tooltip="Filter by a specific vacancy first, then use Bulk OCR to process all its applications">
+        <a href="#!" class="btn grey lighten-1 disabled">
+          <i class="material-icons left">document_scanner</i>Bulk OCR
+        </a>
+      </span>
+    {% endif %}
   </div>
 </div>
 
@@ -144,8 +161,14 @@
                 </td>
                 <td style="text-align:center;">
                   <a href="{% url 'hr_admin:application_detail' app.pk %}"
-                     class="btn-small" style="background:#003087;padding:0 10px;">
+                     class="btn-small tooltipped" data-position="top" data-tooltip="View Application"
+                     style="background:#003087;padding:0 10px;margin-right:4px;">
                     <i class="material-icons" style="font-size:14px;">visibility</i>
+                  </a>
+                  <a href="{% url 'hr_admin:application_summary' app.pk %}"
+                     class="btn-small tooltipped" data-position="top" data-tooltip="Full Summary + OCR"
+                     style="background:#00695c;padding:0 10px;">
+                    <i class="material-icons" style="font-size:14px;">summarize</i>
                   </a>
                 </td>
               </tr>

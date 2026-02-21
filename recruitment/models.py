@@ -191,16 +191,16 @@ class Application(models.Model):
         score += (completeness_score / 100) * 15
 
         self.total_score = round(score, 2)
+        self.save(update_fields=['total_score'])
 
-        # Generate AI summary
-        self.ai_summary = (
-            f"Applicant {self.full_name()} from {self.province} applied for {self.vacancy.title}. "
-            f"Highest qualification: {self.get_highest_qualification_display()} from {self.institution} ({self.year_completed}), "
-            f"result: {self.grade_result}. "
-            f"Work experience: {self.years_experience} year(s). "
-            f"Automated score: {self.total_score}/100."
-        )
-        self.save(update_fields=['total_score', 'ai_summary'])
+        # Regenerate the full OCR-enhanced summary
+        try:
+            from recruitment.ocr_service import generate_application_summary
+            self.ai_summary = generate_application_summary(self)
+            self.save(update_fields=['ai_summary'])
+        except Exception:
+            pass
+
         return self.total_score
 
 

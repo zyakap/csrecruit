@@ -151,16 +151,36 @@
     </ul>
 
     <!-- AI Summary Box -->
-    {% if ai_summary %}
-      <div class="ai-summary-box" style="background:linear-gradient(135deg,#e8f4fd,#f0e8ff);border-left:4px solid #003087;border-radius:8px;padding:16px 20px;margin-bottom:16px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <i class="material-icons" style="color:#003087;font-size:20px;">smart_toy</i>
-          <strong style="color:#003087;font-size:14px;">AI Screening Summary</strong>
-          <span class="chip" style="background:#003087;color:#fff;font-size:10px;margin-left:auto;">Auto-generated</span>
-        </div>
-        <p style="font-size:13px;line-height:1.7;color:#333;margin:0;white-space:pre-line;">{{ ai_summary }}</p>
+    <div style="background:linear-gradient(135deg,#e8f4fd,#f0e8ff);border-left:4px solid #003087;border-radius:8px;padding:16px 20px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <i class="material-icons" style="color:#003087;font-size:20px;">summarize</i>
+        <strong style="color:#003087;font-size:14px;">Application Summary &amp; OCR Analysis</strong>
+        <a href="{% url 'hr_admin:application_summary' application.pk %}"
+           class="btn-small waves-effect" style="background:#003087;margin-left:auto;font-size:11px;">
+          <i class="material-icons left" style="font-size:14px;">open_in_new</i>Full Summary
+        </a>
+        <form method="post" style="display:inline;margin:0;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="ocr_all">
+          <button type="submit" class="btn-small teal waves-effect" style="font-size:11px;">
+            <i class="material-icons left" style="font-size:14px;">document_scanner</i>OCR All Docs
+          </button>
+        </form>
+        <form method="post" style="display:inline;margin:0;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="regenerate_summary">
+          <button type="submit" class="btn-small blue waves-effect" style="font-size:11px;">
+            <i class="material-icons left" style="font-size:14px;">refresh</i>Refresh Summary
+          </button>
+        </form>
       </div>
-    {% endif %}
+      {% if application.ai_summary %}
+        <p style="font-size:12px;line-height:1.7;color:#333;margin:0;white-space:pre-wrap;font-family:monospace;background:#fff;padding:12px;border-radius:4px;max-height:260px;overflow-y:auto;">{{ application.ai_summary|truncatechars:1200 }}</p>
+        <a href="{% url 'hr_admin:application_summary' application.pk %}" style="font-size:12px;color:#003087;">Read full summary →</a>
+      {% else %}
+        <p style="font-size:13px;color:#888;margin:0;">No summary yet. Click <em>OCR All Docs</em> then <em>Refresh Summary</em>.</p>
+      {% endif %}
+    </div>
 
     <!-- Documents Card -->
     <div class="card" style="border-radius:8px;margin-bottom:16px;">
@@ -168,36 +188,59 @@
         <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
           <i class="material-icons tiny">attach_file</i> Supporting Documents
         </span>
-        {% if application.documents.all %}
+        {% if documents %}
           <ul class="collection" style="border:none;margin:0;">
-            {% for doc in application.documents.all %}
-              <li class="collection-item" style="padding:10px 0;display:flex;align-items:center;justify-content:space-between;">
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <i class="material-icons" style="color:#003087;">insert_drive_file</i>
-                  <div>
-                    <div style="font-weight:600;font-size:13px;">{{ doc.get_document_type_display }}</div>
-                    <div style="font-size:11px;color:#888;">
-                      Uploaded {{ doc.uploaded_at|date:"d M Y" }}
-                      {% if doc.is_verified %}
-                        &bull; <span style="color:#2e7d32;"><i class="material-icons tiny">verified</i> Verified</span>
-                      {% else %}
-                        &bull; <span style="color:#e65100;">Unverified</span>
-                      {% endif %}
+            {% for doc in documents %}
+              <li class="collection-item" style="padding:10px 0;">
+                <div style="display:flex;align-items:flex-start;gap:10px;justify-content:space-between;flex-wrap:wrap;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <i class="material-icons" style="color:#003087;">insert_drive_file</i>
+                    <div>
+                      <div style="font-weight:600;font-size:13px;">{{ doc.get_doc_type_display }}</div>
+                      <div style="font-size:11px;color:#888;">
+                        {{ doc.filename }} &bull; Uploaded {{ doc.uploaded_at|date:"d M Y" }}
+                        {% if doc.verified %}
+                          &bull; <span style="color:#2e7d32;"><i class="material-icons tiny">verified</i> Verified</span>
+                        {% else %}
+                          &bull; <span style="color:#e65100;">Unverified</span>
+                        {% endif %}
+                        {% if doc.ocr_text %}
+                          &bull; <span style="color:#00695c;"><i class="material-icons tiny">check_circle</i> OCR: {{ doc.ocr_text.split|length }} words</span>
+                        {% else %}
+                          &bull; <span style="color:#888;">No OCR text</span>
+                        {% endif %}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div style="display:flex;gap:6px;">
-                  {% if not doc.is_verified %}
-                    <a href="{% url 'hr_admin:verify_document' doc.pk %}"
-                       class="btn-small tooltipped" data-position="top" data-tooltip="Mark Verified"
-                       style="background:#2e7d32;padding:0 10px;">
-                      <i class="material-icons" style="font-size:14px;">verified</i>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <a href="{% url 'hr_admin:document_ocr' doc.pk %}"
+                       class="btn-small tooltipped" data-position="top" data-tooltip="View OCR Text"
+                       style="background:#00695c;padding:0 10px;">
+                      <i class="material-icons" style="font-size:14px;">text_snippet</i>
                     </a>
-                  {% endif %}
-                  <a href="{{ doc.file.url }}" target="_blank"
-                     class="btn-small" style="background:#003087;padding:0 10px;">
-                    <i class="material-icons" style="font-size:14px;">download</i>
-                  </a>
+                    <form method="post" style="display:inline;margin:0;">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="ocr_doc">
+                      <input type="hidden" name="doc_id" value="{{ doc.pk }}">
+                      <button type="submit" class="btn-small tooltipped teal" data-position="top" data-tooltip="Run OCR on this document" style="padding:0 10px;">
+                        <i class="material-icons" style="font-size:14px;">document_scanner</i>
+                      </button>
+                    </form>
+                    {% if not doc.verified %}
+                      <form method="post" style="display:inline;margin:0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="verify_doc">
+                        <input type="hidden" name="doc_id" value="{{ doc.pk }}">
+                        <button type="submit" class="btn-small tooltipped" data-position="top" data-tooltip="Mark Verified" style="background:#2e7d32;padding:0 10px;">
+                          <i class="material-icons" style="font-size:14px;">verified</i>
+                        </button>
+                      </form>
+                    {% endif %}
+                    <a href="{{ doc.file.url }}" target="_blank"
+                       class="btn-small tooltipped" data-position="top" data-tooltip="Download" style="background:#003087;padding:0 10px;">
+                      <i class="material-icons" style="font-size:14px;">download</i>
+                    </a>
+                  </div>
                 </div>
               </li>
             {% endfor %}

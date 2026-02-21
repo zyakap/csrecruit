@@ -152,8 +152,15 @@ def application_list(request):
         )
 
     vacancies = Vacancy.objects.all()
+
+    from django.core.paginator import Paginator
+    paginator = Paginator(applications, 20)
+    page_number = request.GET.get('page')
+    applications_page = paginator.get_page(page_number)
+
     return render(request, 'hr_admin/application_list.html', {
-        'applications': applications,
+        'applications': applications_page,
+        'vacancy_options': vacancies,
         'vacancies': vacancies,
         'provinces': PROVINCES,
         'statuses': APPLICATION_STATUS,
@@ -202,6 +209,33 @@ def application_detail(request, pk):
             doc.verified_at = timezone.now()
             doc.save()
             messages.success(request, 'Document marked as verified.')
+
+        elif action == 'ocr_doc':
+            doc_id = request.POST.get('doc_id')
+            doc = get_object_or_404(Document, pk=doc_id, application=application)
+            from recruitment.ocr_service import run_ocr_on_document, generate_application_summary
+            text = run_ocr_on_document(doc)
+            words = len(text.split()) if text else 0
+            if words:
+                messages.success(request, f'OCR complete: {words} words extracted from "{doc.filename}".')
+            else:
+                messages.warning(request, f'OCR found no readable text in "{doc.filename}".')
+            # Refresh application summary
+            application.ai_summary = generate_application_summary(application)
+            application.save(update_fields=['ai_summary'])
+
+        elif action == 'ocr_all':
+            from recruitment.ocr_service import run_ocr_on_application_force
+            summary = run_ocr_on_application_force(application)
+            doc_count = application.documents.count()
+            messages.success(request, f'OCR complete on all {doc_count} document(s). Application summary updated.')
+
+        elif action == 'regenerate_summary':
+            from recruitment.ocr_service import generate_application_summary
+            summary = generate_application_summary(application)
+            application.ai_summary = summary
+            application.save(update_fields=['ai_summary'])
+            messages.success(request, 'Application summary regenerated.')
 
         return redirect('hr_admin:application_detail', pk=pk)
 
@@ -426,3 +460,59 @@ def export_shortlist(request, vacancy_pk):
     response['Content-Disposition'] = f'attachment; filename="shortlist_{vacancy.reference_number}.xlsx"'
     wb.save(response)
     return response
+
+
+# ---------- OCR & Summary Views ----------
+
+@hr_required
+def application_summary(request, pk):
+    """Full printable summary of an application including all OCR text."""
+    application = get_object_or_404(Application, pk=pk)
+    documents = application.documents.all()
+
+    # If no summary exists, generate one now
+    if not application.ai_summary:
+        from recruitment.ocr_service import generate_application_summary
+        application.ai_summary = generate_application_summary(application)
+        application.save(update_fields=['ai_summary'])
+
+    return render(request, 'hr_admin/application_summary.html', {
+        'application': application,
+        'documents': documents,
+    })
+
+
+@hr_required
+def document_ocr_view(request, doc_pk):
+    """View full OCR-extracted text for a single document."""
+    doc = get_object_or_404(Document, pk=doc_pk)
+
+    if request.method == 'POST' and request.POST.get('action') == 're_ocr':
+        from recruitment.ocr_service import run_ocr_on_document, generate_application_summary
+        run_ocr_on_document(doc)
+        doc.refresh_from_db()
+        app = doc.application
+        app.ai_summary = generate_application_summary(app)
+        app.save(update_fields=['ai_summary'])
+        messages.success(request, f'OCR re-run complete: {len(doc.ocr_text.split())} words extracted.')
+        return redirect('hr_admin:document_ocr', doc_pk=doc_pk)
+
+    return render(request, 'hr_admin/document_ocr.html', {'doc': doc})
+
+
+@hr_required
+def bulk_ocr_vacancy(request, vacancy_pk):
+    """Run OCR on all documents for all applications under a vacancy."""
+    from recruitment.ocr_service import run_ocr_on_application
+    vacancy = get_object_or_404(Vacancy, pk=vacancy_pk)
+    applications = vacancy.applications.all()
+    processed = 0
+    for app in applications:
+        run_ocr_on_application(app)
+        processed += 1
+    messages.success(
+        request,
+        f'Bulk OCR complete: processed {processed} application(s) under "{vacancy.title}". '
+        f'All summaries have been updated.'
+    )
+    return redirect('hr_admin:application_list')
