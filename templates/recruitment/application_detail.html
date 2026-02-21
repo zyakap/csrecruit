@@ -1,0 +1,545 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Application #{{ application.pk }} | PNGCS Recruitment Portal{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<div style="background:#003087; padding:.6rem 0;">
+  <div class="container">
+    <nav style="background:transparent; box-shadow:none; height:auto; line-height:normal;">
+      <div class="nav-wrapper">
+        <div class="col s12" style="padding:0;">
+          <a href="{% url 'recruitment:dashboard' %}" class="breadcrumb white-text"
+             style="font-size:.9rem; opacity:.85;">My Dashboard</a>
+          <span class="breadcrumb white-text" style="font-size:.9rem; font-weight:600;">
+            Application #{{ application.pk }}
+          </span>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+
+{% if messages %}
+<div class="container" style="margin-top:1rem;">
+  {% for message in messages %}
+    <div class="msg-flash {{ message.tags }}">
+      <i class="material-icons left">
+        {% if message.tags == 'success' %}check_circle
+        {% elif message.tags == 'warning' %}warning
+        {% else %}info{% endif %}
+      </i>
+      {{ message }}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="container" style="margin-top:1.5rem; margin-bottom:3rem;">
+  <div class="row">
+
+    <!-- LEFT COLUMN -->
+    <div class="col s12 m8">
+
+      <!-- Progress Tracker -->
+      <div class="card z-depth-1" style="border-radius:6px; margin-bottom:1.25rem;">
+        <div class="card-content" style="padding:1.25rem 1.5rem;">
+          <h6 style="font-weight:700; color:#003087; margin:0 0 1.25rem 0; font-size:1rem; border-bottom:2px solid #FFD700; padding-bottom:.5rem;">
+            <i class="material-icons small" style="vertical-align:middle; margin-right:4px;">timeline</i>
+            Application Progress
+          </h6>
+
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; position:relative; padding:0 .5rem;">
+            <!-- Connector line -->
+            <div style="position:absolute; top:18px; left:10%; right:10%; height:3px; background:#e0e0e0; z-index:0;"></div>
+            <div style="position:absolute; top:18px; left:10%;
+                        width:{% if application.status == 'submitted' %}0%{% elif application.status == 'under_review' %}25%{% elif application.status == 'shortlisted' %}50%{% elif application.status == 'interview_scheduled' %}75%{% elif application.status == 'selected' or application.status == 'rejected' %}80%{% else %}0%{% endif %};
+                        height:3px; background:#003087; z-index:1; transition:width .4s;"></div>
+
+            {% with statuses="submitted,under_review,shortlisted,interview_scheduled,selected" %}
+            {% with status_labels="Submitted,Review,Shortlisted,Interview,Selected" %}
+            {% with status_icons="send,find_in_page,star,event,check_circle" %}
+
+            <!-- Step 1: Submitted -->
+            {% with step_done=True %}
+            <div class="pt-step" style="display:flex; flex-direction:column; align-items:center; z-index:2; width:20%;">
+              <div class="pt-circle {% if application.status == 'submitted' %}active{% else %}done{% endif %}"
+                   style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:.5rem;
+                          background:{% if application.status == 'submitted' %}#003087{% else %}#43a047{% endif %};
+                          box-shadow:{% if application.status == 'submitted' %}0 0 0 4px rgba(0,48,135,.2){% else %}none{% endif %};">
+                <i class="material-icons" style="color:#fff; font-size:1rem;">send</i>
+              </div>
+              <span style="font-size:.72rem; font-weight:{% if application.status == 'submitted' %}700{% else %}500{% endif %}; color:{% if application.status == 'submitted' %}#003087{% else %}#43a047{% endif %}; text-align:center; line-height:1.3;">
+                Submitted
+              </span>
+            </div>
+            {% endwith %}
+
+            <!-- Step 2: Under Review -->
+            <div class="pt-step" style="display:flex; flex-direction:column; align-items:center; z-index:2; width:20%;">
+              {% with is_done=application.status == 'shortlisted' or application.status == 'interview_scheduled' or application.status == 'selected' or application.status == 'rejected' %}
+              {% with is_active=application.status == 'under_review' %}
+              <div class="pt-circle {% if is_active %}active{% elif is_done %}done{% endif %}"
+                   style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:.5rem;
+                          background:{% if is_active %}#003087{% elif is_done %}#43a047{% else %}#e0e0e0{% endif %};
+                          box-shadow:{% if is_active %}0 0 0 4px rgba(0,48,135,.2){% else %}none{% endif %};">
+                <i class="material-icons" style="color:{% if is_active or is_done %}#fff{% else %}#bbb{% endif %}; font-size:1rem;">find_in_page</i>
+              </div>
+              <span style="font-size:.72rem; font-weight:{% if is_active %}700{% else %}400{% endif %}; color:{% if is_active %}#003087{% elif is_done %}#43a047{% else %}#bbb{% endif %}; text-align:center; line-height:1.3;">
+                Review
+              </span>
+              {% endwith %}
+              {% endwith %}
+            </div>
+
+            <!-- Step 3: Shortlisted -->
+            <div class="pt-step" style="display:flex; flex-direction:column; align-items:center; z-index:2; width:20%;">
+              {% with is_done=application.status == 'interview_scheduled' or application.status == 'selected' %}
+              {% with is_active=application.status == 'shortlisted' %}
+              <div class="pt-circle {% if is_active %}active{% elif is_done %}done{% endif %}"
+                   style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:.5rem;
+                          background:{% if is_active %}#003087{% elif is_done %}#43a047{% else %}#e0e0e0{% endif %};
+                          box-shadow:{% if is_active %}0 0 0 4px rgba(0,48,135,.2){% else %}none{% endif %};">
+                <i class="material-icons" style="color:{% if is_active or is_done %}#fff{% else %}#bbb{% endif %}; font-size:1rem;">star</i>
+              </div>
+              <span style="font-size:.72rem; font-weight:{% if is_active %}700{% else %}400{% endif %}; color:{% if is_active %}#003087{% elif is_done %}#43a047{% else %}#bbb{% endif %}; text-align:center; line-height:1.3;">
+                Shortlisted
+              </span>
+              {% endwith %}
+              {% endwith %}
+            </div>
+
+            <!-- Step 4: Interview -->
+            <div class="pt-step" style="display:flex; flex-direction:column; align-items:center; z-index:2; width:20%;">
+              {% with is_done=application.status == 'selected' %}
+              {% with is_active=application.status == 'interview_scheduled' %}
+              <div class="pt-circle {% if is_active %}active{% elif is_done %}done{% endif %}"
+                   style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:.5rem;
+                          background:{% if is_active %}#003087{% elif is_done %}#43a047{% else %}#e0e0e0{% endif %};
+                          box-shadow:{% if is_active %}0 0 0 4px rgba(0,48,135,.2){% else %}none{% endif %};">
+                <i class="material-icons" style="color:{% if is_active or is_done %}#fff{% else %}#bbb{% endif %}; font-size:1rem;">event</i>
+              </div>
+              <span style="font-size:.72rem; font-weight:{% if is_active %}700{% else %}400{% endif %}; color:{% if is_active %}#003087{% elif is_done %}#43a047{% else %}#bbb{% endif %}; text-align:center; line-height:1.3;">
+                Interview
+              </span>
+              {% endwith %}
+              {% endwith %}
+            </div>
+
+            <!-- Step 5: Selected / Rejected -->
+            <div class="pt-step" style="display:flex; flex-direction:column; align-items:center; z-index:2; width:20%;">
+              {% with is_active=application.status == 'selected' %}
+              {% with is_rejected=application.status == 'rejected' %}
+              <div class="pt-circle {% if is_active %}done{% elif is_rejected %}rejected{% endif %}"
+                   style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:.5rem;
+                          background:{% if is_active %}#43a047{% elif is_rejected %}#c62828{% else %}#e0e0e0{% endif %};
+                          box-shadow:{% if is_active %}0 0 0 4px rgba(67,160,71,.2){% elif is_rejected %}0 0 0 4px rgba(198,40,40,.2){% else %}none{% endif %};">
+                <i class="material-icons" style="color:{% if is_active or is_rejected %}#fff{% else %}#bbb{% endif %}; font-size:1rem;">
+                  {% if is_rejected %}cancel{% else %}check_circle{% endif %}
+                </i>
+              </div>
+              <span style="font-size:.72rem; font-weight:{% if is_active or is_rejected %}700{% else %}400{% endif %}; color:{% if is_active %}#43a047{% elif is_rejected %}#c62828{% else %}#bbb{% endif %}; text-align:center; line-height:1.3;">
+                {% if is_rejected %}Rejected{% else %}Selected{% endif %}
+              </span>
+              {% endwith %}
+              {% endwith %}
+            </div>
+
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+
+          </div><!-- /progress flex -->
+        </div><!-- /card-content -->
+      </div><!-- /progress card -->
+
+
+      <!-- Application Details Collapsible Card -->
+      <div class="card z-depth-1" style="border-radius:6px; margin-bottom:1.25rem;">
+        <div class="card-content" style="padding:1.25rem 1.5rem;">
+          <h6 style="font-weight:700; color:#003087; margin:0 0 1rem 0; font-size:1rem; border-bottom:2px solid #FFD700; padding-bottom:.5rem;">
+            <i class="material-icons small" style="vertical-align:middle; margin-right:4px;">article</i>
+            Application Details
+          </h6>
+
+          <ul class="collapsible" style="box-shadow:none; border:1px solid #e8e8e8; border-radius:4px; margin:0;">
+
+            <!-- Personal Details -->
+            <li class="active">
+              <div class="collapsible-header" style="background:#f9f9ff; font-weight:600; color:#003087; font-size:.92rem;">
+                <i class="material-icons small" style="color:#FFD700;">person</i>
+                Personal Details
+              </div>
+              <div class="collapsible-body" style="padding:1rem 1.25rem; background:#fff;">
+                <div class="row" style="margin:0;">
+                  <div class="col s12 m6" style="margin-bottom:.5rem;">
+                    <span style="color:#888; font-size:.8rem; display:block;">Full Name</span>
+                    <span style="color:#333; font-size:.92rem; font-weight:500;">{{ application.applicant.get_full_name }}</span>
+                  </div>
+                  <div class="col s12 m6" style="margin-bottom:.5rem;">
+                    <span style="color:#888; font-size:.8rem; display:block;">Email</span>
+                    <span style="color:#333; font-size:.92rem; font-weight:500;">{{ application.applicant.email }}</span>
+                  </div>
+                  {% if application.phone %}
+                  <div class="col s12 m6" style="margin-bottom:.5rem;">
+                    <span style="color:#888; font-size:.8rem; display:block;">Phone</span>
+                    <span style="color:#333; font-size:.92rem; font-weight:500;">{{ application.phone }}</span>
+                  </div>
+                  {% endif %}
+                  {% if application.address %}
+                  <div class="col s12 m6" style="margin-bottom:.5rem;">
+                    <span style="color:#888; font-size:.8rem; display:block;">Address</span>
+                    <span style="color:#333; font-size:.92rem; font-weight:500;">{{ application.address }}</span>
+                  </div>
+                  {% endif %}
+                  {% if application.nationality %}
+                  <div class="col s12 m6" style="margin-bottom:.5rem;">
+                    <span style="color:#888; font-size:.8rem; display:block;">Nationality</span>
+                    <span style="color:#333; font-size:.92rem; font-weight:500;">{{ application.nationality }}</span>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </li>
+
+            <!-- Education -->
+            <li>
+              <div class="collapsible-header" style="background:#f9f9ff; font-weight:600; color:#003087; font-size:.92rem;">
+                <i class="material-icons small" style="color:#FFD700;">school</i>
+                Education &amp; Qualifications
+              </div>
+              <div class="collapsible-body" style="padding:1rem 1.25rem; background:#fff;">
+                {% if application.education_details %}
+                  <div style="color:#444; font-size:.9rem; line-height:1.75;">
+                    {{ application.education_details|linebreaks }}
+                  </div>
+                {% else %}
+                  <p style="color:#aaa; font-style:italic; font-size:.9rem; margin:0;">No education details provided.</p>
+                {% endif %}
+              </div>
+            </li>
+
+            <!-- Work History -->
+            <li>
+              <div class="collapsible-header" style="background:#f9f9ff; font-weight:600; color:#003087; font-size:.92rem;">
+                <i class="material-icons small" style="color:#FFD700;">work_history</i>
+                Work History
+              </div>
+              <div class="collapsible-body" style="padding:1rem 1.25rem; background:#fff;">
+                {% if application.work_history %}
+                  <div style="color:#444; font-size:.9rem; line-height:1.75;">
+                    {{ application.work_history|linebreaks }}
+                  </div>
+                {% else %}
+                  <p style="color:#aaa; font-style:italic; font-size:.9rem; margin:0;">No work history provided.</p>
+                {% endif %}
+              </div>
+            </li>
+
+            <!-- Cover Letter -->
+            <li>
+              <div class="collapsible-header" style="background:#f9f9ff; font-weight:600; color:#003087; font-size:.92rem;">
+                <i class="material-icons small" style="color:#FFD700;">mail_outline</i>
+                Cover Letter
+              </div>
+              <div class="collapsible-body" style="padding:1rem 1.25rem; background:#fff;">
+                {% if application.cover_letter %}
+                  <div style="color:#444; font-size:.9rem; line-height:1.8; font-style:italic; border-left:3px solid #FFD700; padding-left:.85rem;">
+                    {{ application.cover_letter|linebreaks }}
+                  </div>
+                {% else %}
+                  <p style="color:#aaa; font-style:italic; font-size:.9rem; margin:0;">No cover letter provided.</p>
+                {% endif %}
+              </div>
+            </li>
+
+          </ul><!-- /collapsible -->
+        </div><!-- /card-content -->
+      </div><!-- /details card -->
+
+
+      <!-- Interview Schedule Card -->
+      {% if interviews %}
+      <div class="card z-depth-1" style="border-radius:6px; margin-bottom:1.25rem;">
+        <div class="card-content" style="padding:1.25rem 1.5rem;">
+          <h6 style="font-weight:700; color:#003087; margin:0 0 1rem 0; font-size:1rem; border-bottom:2px solid #FFD700; padding-bottom:.5rem;">
+            <i class="material-icons small" style="vertical-align:middle; margin-right:4px;">event</i>
+            Interview Schedule
+          </h6>
+
+          {% for interview in interviews %}
+          <div style="background:#f9f9ff; border-radius:4px; border-left:4px solid #003087; padding:.85rem 1rem; margin-bottom:.75rem;">
+            <div class="row valign-wrapper" style="margin:0;">
+              <div class="col s12 m7">
+                <div style="font-weight:600; color:#003087; font-size:.95rem; margin-bottom:.3rem;">
+                  <i class="material-icons tiny" style="vertical-align:middle; margin-right:3px;">calendar_today</i>
+                  {{ interview.scheduled_date|date:"l, d F Y" }}
+                  &nbsp;at&nbsp;
+                  <strong>{{ interview.scheduled_date|date:"g:i A" }}</strong>
+                </div>
+                {% if interview.venue %}
+                <div style="font-size:.85rem; color:#555;">
+                  <i class="material-icons tiny" style="vertical-align:middle; margin-right:3px;">place</i>
+                  {{ interview.venue }}
+                </div>
+                {% endif %}
+                {% if interview.notes %}
+                <div style="font-size:.82rem; color:#888; margin-top:.3rem;">
+                  <i class="material-icons tiny" style="vertical-align:middle;">info</i>
+                  {{ interview.notes }}
+                </div>
+                {% endif %}
+              </div>
+              <div class="col s12 m5 right-align">
+                <span class="chip s-{{ interview.status|default:'interview_scheduled' }}" style="font-size:.78rem;">
+                  {{ interview.get_status_display|default:"Scheduled" }}
+                </span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+
+        </div>
+      </div>
+      {% endif %}<!-- /interviews -->
+
+
+      <!-- Documents Card -->
+      <div class="card z-depth-1" style="border-radius:6px;">
+        <div class="card-content" style="padding:1.25rem 1.5rem;">
+          <h6 style="font-weight:700; color:#003087; margin:0 0 1rem 0; font-size:1rem; border-bottom:2px solid #FFD700; padding-bottom:.5rem;">
+            <i class="material-icons small" style="vertical-align:middle; margin-right:4px;">attach_file</i>
+            Supporting Documents
+          </h6>
+
+          {% if documents %}
+            <ul class="collection" style="border:none; margin:0 0 1rem 0;">
+              {% for doc in documents %}
+              <li class="collection-item" style="padding:.7rem .25rem; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:.65rem;">
+                <i class="material-icons" style="color:#003087; font-size:1.3rem;">
+                  {% if doc.doc_type == 'cv' %}description
+                  {% elif doc.doc_type == 'cert' %}workspace_premium
+                  {% elif doc.doc_type == 'id' %}badge
+                  {% else %}insert_drive_file{% endif %}
+                </i>
+                <div style="flex:1; min-width:0;">
+                  <div style="font-size:.88rem; font-weight:500; color:#333; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    {{ doc.name|default:doc.file.name }}
+                  </div>
+                  <div style="font-size:.75rem; color:#999;">
+                    {{ doc.doc_type_display|default:doc.doc_type|capfirst }}
+                    &bull; Uploaded {{ doc.uploaded_at|date:"d M Y" }}
+                  </div>
+                </div>
+                {% if doc.is_verified %}
+                <span class="chip" style="background:#E8F5E9; color:#2e7d32; font-size:.72rem; font-weight:600; padding:0 .6rem; height:1.6rem; line-height:1.6rem;">
+                  <i class="material-icons tiny" style="margin-right:2px;">verified</i>Verified
+                </span>
+                {% else %}
+                <span class="chip" style="background:#FFF8E1; color:#7a5c00; font-size:.72rem; padding:0 .6rem; height:1.6rem; line-height:1.6rem;">
+                  Pending
+                </span>
+                {% endif %}
+                <a href="{{ doc.file.url }}" target="_blank"
+                   class="btn-flat btn-small waves-effect"
+                   style="padding:0 .5rem; color:#003087;">
+                  <i class="material-icons tiny">download</i>
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div style="text-align:center; padding:1.25rem; color:#bbb;">
+              <i class="material-icons" style="font-size:2.5rem; display:block; margin-bottom:.5rem;">folder_open</i>
+              <span style="font-size:.88rem;">No documents uploaded yet.</span>
+            </div>
+          {% endif %}
+
+          <!-- Upload More Form -->
+          <div class="section-divider" style="margin:1rem 0;"></div>
+          <h6 style="font-size:.9rem; font-weight:600; color:#555; margin:0 0 .75rem 0;">
+            <i class="material-icons tiny" style="vertical-align:middle; margin-right:3px;">upload_file</i>
+            Upload Additional Document
+          </h6>
+          <form method="post" action="{% url 'recruitment:upload_document' application.pk %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row" style="margin:0;">
+              <div class="input-field col s12 m5" style="margin-top:0;">
+                <select name="doc_type" id="doc-type">
+                  <option value="" disabled selected>Document Type</option>
+                  <option value="cv">CV / Resume</option>
+                  <option value="cert">Academic Certificate</option>
+                  <option value="id">Identification</option>
+                  <option value="ref">Reference Letter</option>
+                  <option value="other">Other</option>
+                </select>
+                <label for="doc-type">Type</label>
+              </div>
+              <div class="file-field input-field col s12 m5" style="margin-top:.75rem;">
+                <div class="btn pngcs btn-small waves-effect waves-light" style="height:2rem; line-height:2rem;">
+                  <span style="font-size:.8rem;">Browse</span>
+                  <input type="file" name="document" accept=".pdf,.doc,.docx,.jpg,.png">
+                </div>
+                <div class="file-path-wrapper">
+                  <input class="file-path validate" type="text" placeholder="Choose file…" style="font-size:.85rem;">
+                </div>
+              </div>
+              <div class="col s12 m2" style="padding-top:.9rem;">
+                <button type="submit" class="btn pngcs waves-effect waves-light btn-small"
+                        style="height:2.25rem; line-height:2.25rem; font-size:.8rem; width:100%;">
+                  <i class="material-icons left tiny">upload</i>Upload
+                </button>
+              </div>
+            </div>
+          </form>
+
+        </div><!-- /card-content -->
+      </div><!-- /documents card -->
+
+    </div><!-- /left col -->
+
+
+    <!-- RIGHT COLUMN: Status Summary Card -->
+    <div class="col s12 m4">
+      <div style="position:sticky; top:80px;">
+
+        <!-- Status Card -->
+        <div class="card z-depth-1" style="border-radius:6px; overflow:hidden;">
+          <!-- Coloured header strip -->
+          <div style="background:{% if application.status == 'selected' %}#43a047{% elif application.status == 'rejected' %}#c62828{% elif application.status == 'shortlisted' or application.status == 'interview_scheduled' %}#FFD700{% else %}#003087{% endif %}; padding:1.25rem; text-align:center;">
+            <i class="material-icons" style="font-size:3rem; color:{% if application.status == 'shortlisted' or application.status == 'interview_scheduled' %}#003087{% else %}#fff{% endif %};">
+              {% if application.status == 'submitted' %}send
+              {% elif application.status == 'under_review' %}find_in_page
+              {% elif application.status == 'shortlisted' %}star
+              {% elif application.status == 'interview_scheduled' %}event_available
+              {% elif application.status == 'selected' %}check_circle
+              {% elif application.status == 'rejected' %}cancel
+              {% else %}help_outline{% endif %}
+            </i>
+            <h6 style="color:{% if application.status == 'shortlisted' or application.status == 'interview_scheduled' %}#003087{% else %}#fff{% endif %}; font-weight:700; margin:.4rem 0 0 0; font-size:1.05rem;">
+              {% if application.status == 'submitted' %}Application Submitted
+              {% elif application.status == 'under_review' %}Under Review
+              {% elif application.status == 'shortlisted' %}You've Been Shortlisted!
+              {% elif application.status == 'interview_scheduled' %}Interview Scheduled
+              {% elif application.status == 'selected' %}Congratulations — Selected!
+              {% elif application.status == 'rejected' %}Application Unsuccessful
+              {% else %}{{ application.get_status_display }}{% endif %}
+            </h6>
+          </div>
+
+          <div class="card-content" style="padding:1.25rem 1.5rem;">
+
+            <!-- Status message -->
+            <p style="color:#555; font-size:.88rem; line-height:1.6; margin-bottom:1rem;">
+              {% if application.status == 'submitted' %}
+                Your application has been received and is awaiting review by the recruitment panel.
+              {% elif application.status == 'under_review' %}
+                Your application is currently being reviewed. We will notify you of any updates.
+              {% elif application.status == 'shortlisted' %}
+                You have been shortlisted for this position. Please await further instructions regarding an interview.
+              {% elif application.status == 'interview_scheduled' %}
+                An interview has been scheduled. Please check your interview details in the panel on the left.
+              {% elif application.status == 'selected' %}
+                You have been selected for this position. Congratulations! Our team will contact you with further details.
+              {% elif application.status == 'rejected' %}
+                We regret to inform you that your application was not successful at this time. We encourage you to apply for future vacancies.
+              {% else %}
+                Your application status has been updated.
+              {% endif %}
+            </p>
+
+            <div class="section-divider" style="margin:.75rem 0;"></div>
+
+            <!-- Meta details -->
+            <table style="font-size:.85rem; width:100%;">
+              <tbody>
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                  <td style="padding:.45rem .25rem; color:#888;">Position</td>
+                  <td style="padding:.45rem .25rem; color:#333; font-weight:500;">{{ application.vacancy.title }}</td>
+                </tr>
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                  <td style="padding:.45rem .25rem; color:#888;">Department</td>
+                  <td style="padding:.45rem .25rem; color:#333; font-weight:500;">{{ application.vacancy.department }}</td>
+                </tr>
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                  <td style="padding:.45rem .25rem; color:#888;">Submitted</td>
+                  <td style="padding:.45rem .25rem; color:#333; font-weight:500;">{{ application.submitted_at|date:"d M Y, g:i A" }}</td>
+                </tr>
+                {% if application.updated_at %}
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                  <td style="padding:.45rem .25rem; color:#888;">Last Updated</td>
+                  <td style="padding:.45rem .25rem; color:#333; font-weight:500;">{{ application.updated_at|date:"d M Y, g:i A" }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                  <td style="padding:.45rem .25rem; color:#888;">Status</td>
+                  <td style="padding:.45rem .25rem;">
+                    <span class="chip s-{{ application.status }}" style="font-size:.78rem;">
+                      {{ application.get_status_display }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Score Display -->
+            {% if application.score is not None %}
+            <div class="section-divider" style="margin:.85rem 0;"></div>
+            <div style="text-align:center;">
+              <span style="font-size:.8rem; color:#888; display:block; margin-bottom:.4rem; text-transform:uppercase; letter-spacing:.5px;">Assessment Score</span>
+              <div style="display:inline-block; position:relative;">
+                <svg width="90" height="90" viewBox="0 0 90 90">
+                  <circle cx="45" cy="45" r="38" fill="none" stroke="#e0e0e0" stroke-width="8"/>
+                  <circle cx="45" cy="45" r="38" fill="none"
+                          stroke="{% if application.score >= 75 %}#43a047{% elif application.score >= 50 %}#f57c00{% else %}#c62828{% endif %}"
+                          stroke-width="8"
+                          stroke-dasharray="{{ application.score|floatformat:0 }} 100"
+                          stroke-dashoffset="25"
+                          stroke-linecap="round"
+                          transform="rotate(-90 45 45)"/>
+                </svg>
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
+                  <span class="chip {% if application.score >= 75 %}score-hi{% elif application.score >= 50 %}score-md{% else %}score-lo{% endif %}"
+                        style="font-size:1rem; font-weight:700; padding:0 .5rem; height:2rem; line-height:2rem; margin:0;">
+                    {{ application.score }}%
+                  </span>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Back to dashboard -->
+            <div style="margin-top:1.25rem;">
+              <a href="{% url 'recruitment:dashboard' %}"
+                 class="btn-flat waves-effect pngcs-text"
+                 style="width:100%; text-align:center; font-size:.88rem; height:2.25rem; line-height:2.25rem; border:1px solid #003087; border-radius:2px;">
+                <i class="material-icons left">arrow_back</i>Back to Dashboard
+              </a>
+            </div>
+
+          </div><!-- /card-content -->
+        </div><!-- /status card -->
+
+      </div><!-- /sticky -->
+    </div><!-- /right col -->
+
+  </div><!-- /row -->
+</div><!-- /container -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Collapsible
+    var collapsibles = document.querySelectorAll('.collapsible');
+    M.Collapsible.init(collapsibles, {});
+
+    // Select dropdowns
+    var selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects, {});
+  });
+</script>
+{% endblock %}

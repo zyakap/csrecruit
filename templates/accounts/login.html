@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Sign In — PNGCS Recruitment{% endblock %}
+{% block content %}
+<div style="background: linear-gradient(135deg, #003087 0%, #1a4db3 100%); min-height: 92vh; display: flex; align-items: center; padding: 40px 0;">
+    <div class="container">
+        <div class="row" style="margin:0;">
+            <div class="col s12 m8 l4 offset-m2 offset-l4">
+                <div class="card z-depth-4" style="border-radius: 12px; overflow:hidden;">
+                    <div style="background: #003087; padding: 32px 24px; text-align: center;">
+                        <i class="material-icons" style="font-size:3rem; color:#FFD700;">shield</i>
+                        <h5 style="color:#fff; font-weight:700; margin:8px 0 4px;">Sign In to Portal</h5>
+                        <p style="color:rgba(255,255,255,0.65); font-size:0.85rem; margin:0;">PNGCS Recruitment Management System</p>
+                    </div>
+                    <div class="card-content" style="padding:28px 28px 16px;">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="input-field">
+                                <i class="material-icons prefix" style="color:#003087;">person_outline</i>
+                                <input id="uid" type="text" name="username" required>
+                                <label for="uid">Username</label>
+                            </div>
+                            <div class="input-field">
+                                <i class="material-icons prefix" style="color:#003087;">lock_outline</i>
+                                <input id="pwd" type="password" name="password" required>
+                                <label for="pwd">Password</label>
+                            </div>
+                            <button type="submit" class="btn pngcs waves-effect waves-light btn-large" style="width:100%; margin-top:8px; border-radius:4px; font-weight:700; background:#003087;">
+                                <i class="material-icons left">login</i>Sign In
+                            </button>
+                        </form>
+                        <p class="center-align grey-text" style="margin:20px 0 8px; font-size:0.88rem;">
+                            New applicant? <a href="{% url 'accounts:register' %}" style="color:#003087; font-weight:600;">Create an account</a>
+                        </p>
+                    </div>
+                    <div style="background:#f5f5f5; padding:12px 28px 16px; border-top:1px solid #e0e0e0;">
+                        <p style="font-size:0.72rem; color:#9e9e9e; margin:0 0 4px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;">Demo Accounts</p>
+                        <p style="font-size:0.8rem; color:#616161; margin:0; line-height:1.8;">
+                            HR Admin: <code>hradmin / demo1234</code><br>
+                            Applicant: <code>john.doe / demo1234</code><br>
+                            Panel: <code>panelist1 / demo1234</code>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

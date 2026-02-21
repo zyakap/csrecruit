@@ -1,0 +1,231 @@
+{% extends 'hr_admin/base.html' %}
+{% load static %}
+
+{% block hr_content %}
+<!-- Header -->
+<div class="row" style="margin-bottom:16px;align-items:center;">
+  <div class="col s12 m8">
+    <h5 style="color:#003087;font-weight:700;margin:0;">
+      <i class="material-icons" style="vertical-align:middle;margin-right:8px;">event</i>
+      Schedule Interview
+    </h5>
+    <p style="color:#666;margin:4px 0 0;">
+      {{ application.full_name }} — {{ application.vacancy.title }}
+    </p>
+  </div>
+  <div class="col s12 m4" style="text-align:right;">
+    <a href="{% url 'hr_admin:application_detail' application.pk %}" class="btn-flat" style="color:#003087;">
+      <i class="material-icons left">arrow_back</i>Back to Application
+    </a>
+  </div>
+</div>
+
+<div class="row">
+  <!-- LEFT COL: Schedule Form -->
+  <div class="col s12 m7">
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">calendar_today</i> Interview Details
+        </span>
+        <form method="post" action="">
+          {% csrf_token %}
+
+          <!-- Date & Time -->
+          <div class="row">
+            <div class="col s12">
+              <div class="input-field">
+                <input type="datetime-local" id="id_scheduled_at" name="scheduled_at"
+                       value="{{ form.scheduled_at.value|default:'' }}"
+                       class="{% if form.scheduled_at.errors %}invalid{% endif %}"
+                       required>
+                <label for="id_scheduled_at" class="active">Interview Date &amp; Time *</label>
+                {% if form.scheduled_at.errors %}
+                  <span class="helper-text red-text">{{ form.scheduled_at.errors|join:", " }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Venue -->
+          <div class="row">
+            <div class="col s12">
+              <div class="input-field">
+                <input type="text" id="id_venue" name="venue"
+                       value="{{ form.venue.value|default:'' }}"
+                       class="{% if form.venue.errors %}invalid{% endif %}"
+                       placeholder="e.g. Conference Room A, Waigani Drive, NCD"
+                       required>
+                <label for="id_venue">Venue / Location *</label>
+                {% if form.venue.errors %}
+                  <span class="helper-text red-text">{{ form.venue.errors|join:", " }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel Members -->
+          <div class="row">
+            <div class="col s12">
+              <p style="font-weight:600;color:#003087;margin-bottom:8px;">
+                <i class="material-icons tiny">people</i> Panel Members *
+              </p>
+              <div style="max-height:220px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:4px;padding:8px 12px;">
+                {% if panel_members %}
+                  {% for member in panel_members %}
+                    <p style="margin:4px 0;">
+                      <label>
+                        <input type="checkbox" name="panel_members" value="{{ member.pk }}"
+                               class="filled-in"
+                               {% if member.pk in selected_panel_ids %}checked{% endif %}/>
+                        <span>
+                          {{ member.get_full_name }}
+                          <span style="font-size:11px;color:#888;">— {{ member.profile.get_role_display|default:member.email }}</span>
+                        </span>
+                      </label>
+                    </p>
+                  {% endfor %}
+                {% else %}
+                  <p style="color:#aaa;font-size:13px;text-align:center;padding:12px;">
+                    No panel members available. Add staff accounts with panel access.
+                  </p>
+                {% endif %}
+              </div>
+              {% if form.panel_members.errors %}
+                <span class="helper-text red-text">{{ form.panel_members.errors|join:", " }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="row">
+            <div class="col s12">
+              <div class="input-field">
+                <textarea id="id_notes" name="notes"
+                          class="materialize-textarea"
+                          style="min-height:100px;">{{ form.notes.value|default:'' }}</textarea>
+                <label for="id_notes">Interview Notes / Instructions</label>
+                <span class="helper-text">Optional notes for the panel and applicant.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-divider" style="border-top:1px solid #eee;margin:8px 0 16px;"></div>
+
+          <button type="submit" class="btn" style="background:#003087;">
+            <i class="material-icons left">event_available</i>
+            {% if existing_interview %}Update Interview{% else %}Schedule Interview{% endif %}
+          </button>
+          <a href="{% url 'hr_admin:application_detail' application.pk %}" class="btn-flat" style="color:#666;margin-left:8px;">
+            Cancel
+          </a>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COL: Applicant Summary -->
+  <div class="col s12 m5">
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">person</i> Applicant Summary
+        </span>
+        <table style="font-size:13px;width:100%;">
+          <tbody>
+            <tr>
+              <td style="color:#888;font-weight:600;padding:6px 0;width:42%;">Full Name</td>
+              <td style="padding:6px 0;font-weight:700;">{{ application.full_name }}</td>
+            </tr>
+            <tr>
+              <td style="color:#888;font-weight:600;padding:6px 0;">Position Applied</td>
+              <td style="padding:6px 0;">{{ application.vacancy.title }}</td>
+            </tr>
+            <tr>
+              <td style="color:#888;font-weight:600;padding:6px 0;">Department</td>
+              <td style="padding:6px 0;">{{ application.vacancy.department }}</td>
+            </tr>
+            <tr>
+              <td style="color:#888;font-weight:600;padding:6px 0;">Province</td>
+              <td style="padding:6px 0;">{{ application.province }}</td>
+            </tr>
+            <tr>
+              <td style="color:#888;font-weight:600;padding:6px 0;">Qualification</td>
+              <td style="padding:6px 0;">
+                <span class="chip" style="background:#e3eaf6;color:#003087;font-size:11px;">
+                  {{ application.get_qualification_display }}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td style="color:#888;font-weight:600;padding:6px 0;">Experience</td>
+              <td style="padding:6px 0;">{{ application.years_experience|default:"0" }} year{{ application.years_experience|pluralize }}</td>
+            </tr>
+            <tr>
+              <td style="color:#888;font-weight:600;padding:6px 0;">AI Score</td>
+              <td style="padding:6px 0;">
+                {% if application.score is not None %}
+                  {% if application.score >= 70 %}
+                    <span class="chip score-hi">{{ application.score }}/100</span>
+                  {% elif application.score >= 50 %}
+                    <span class="chip score-md">{{ application.score }}/100</span>
+                  {% else %}
+                    <span class="chip score-lo">{{ application.score }}/100</span>
+                  {% endif %}
+                {% else %}
+                  <span style="color:#aaa;">Not scored</span>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td style="color:#888;font-weight:600;padding:6px 0;">Status</td>
+              <td style="padding:6px 0;">
+                <span class="chip s-{{ application.status }}" style="font-size:11px;">
+                  {{ application.get_status_display }}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td style="color:#888;font-weight:600;padding:6px 0;">Email</td>
+              <td style="padding:6px 0;">
+                <a href="mailto:{{ application.email }}" style="color:#003087;font-size:12px;">
+                  {{ application.email }}
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="color:#888;font-weight:600;padding:6px 0;">Phone</td>
+              <td style="padding:6px 0;">{{ application.phone|default:"—" }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        {% if existing_interview %}
+          <div class="section-divider" style="border-top:1px solid #eee;margin:16px 0 12px;"></div>
+          <div style="background:#fff3e0;border-radius:6px;padding:12px;">
+            <div style="font-weight:700;color:#e65100;font-size:13px;margin-bottom:6px;">
+              <i class="material-icons tiny">warning</i> Existing Interview
+            </div>
+            <div style="font-size:12px;color:#555;">
+              Scheduled: {{ existing_interview.scheduled_at|date:"d M Y" }} at {{ existing_interview.scheduled_at|time:"H:i" }}<br>
+              Venue: {{ existing_interview.venue|default:"TBA" }}
+            </div>
+            <div style="font-size:11px;color:#e65100;margin-top:6px;">
+              Saving will update the existing interview record.
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    M.updateTextFields();
+  });
+</script>
+{% endblock %}

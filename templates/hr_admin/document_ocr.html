@@ -1,0 +1,117 @@
+{% extends 'hr_admin/base.html' %}
+
+{% block title %}OCR Text — {{ doc.filename }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:900px; margin:0 auto; padding:20px 16px 60px;">
+
+  <!-- Back -->
+  <div class="row" style="margin-bottom:16px;">
+    <div class="col s12">
+      <a href="{% url 'hr_admin:application_summary' doc.application.pk %}" class="btn-flat waves-effect">
+        <i class="material-icons left">arrow_back</i>Back to Application Summary
+      </a>
+      <a href="{% url 'hr_admin:application_detail' doc.application.pk %}" class="btn-flat waves-effect">
+        <i class="material-icons left">person</i>Application Detail
+      </a>
+    </div>
+  </div>
+
+  <!-- Document Header -->
+  <div class="card teal darken-2 white-text" style="border-radius:8px;">
+    <div class="card-content" style="padding:18px 24px;">
+      <div class="row valign-wrapper" style="margin:0;">
+        <div class="col s1">
+          <i class="material-icons" style="font-size:42px; opacity:.75;">description</i>
+        </div>
+        <div class="col s11" style="padding-left:16px;">
+          <h6 style="margin:0; font-weight:600;">{{ doc.get_doc_type_display }}</h6>
+          <p style="margin:2px 0 0; opacity:.85; font-size:.9rem;">
+            {{ doc.filename }}
+            &nbsp;|&nbsp; Uploaded {{ doc.uploaded_at|date:"d M Y H:i" }}
+            &nbsp;|&nbsp; Applicant: {{ doc.application.full_name }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="card" style="border-radius:8px;">
+    <div class="card-content" style="padding:14px 20px;">
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="re_ocr">
+        <button type="submit" class="btn teal waves-effect waves-light" style="margin-right:8px;">
+          <i class="material-icons left">document_scanner</i>Re-run OCR
+        </button>
+      </form>
+      {% if doc.file %}
+      <a href="{{ doc.file.url }}" target="_blank" class="btn grey darken-1 waves-effect" style="margin-right:8px;">
+        <i class="material-icons left">open_in_new</i>Open Original File
+      </a>
+      {% endif %}
+      <button onclick="window.print();" class="btn grey waves-effect">
+        <i class="material-icons left">print</i>Print
+      </button>
+    </div>
+  </div>
+
+  {% if doc.ocr_text %}
+  <!-- Stats Row -->
+  <div class="row">
+    <div class="col s12 m4">
+      <div class="card-panel teal lighten-5" style="border-radius:8px; text-align:center; padding:16px;">
+        <i class="material-icons teal-text" style="font-size:32px;">text_fields</i>
+        <p style="font-size:1.5rem; font-weight:700; margin:4px 0; color:#00695c;">{{ doc.ocr_text.split|length }}</p>
+        <p style="margin:0; color:#555; font-size:.85rem;">Words Extracted</p>
+      </div>
+    </div>
+    <div class="col s12 m4">
+      <div class="card-panel blue lighten-5" style="border-radius:8px; text-align:center; padding:16px;">
+        <i class="material-icons blue-text" style="font-size:32px;">format_list_numbered</i>
+        <p style="font-size:1.5rem; font-weight:700; margin:4px 0; color:#1565c0;">{{ doc.ocr_text|length }}</p>
+        <p style="margin:0; color:#555; font-size:.85rem;">Characters</p>
+      </div>
+    </div>
+    <div class="col s12 m4">
+      <div class="card-panel green lighten-5" style="border-radius:8px; text-align:center; padding:16px;">
+        <i class="material-icons green-text" style="font-size:32px;">{% if doc.verified %}verified{% else %}pending{% endif %}</i>
+        <p style="font-size:1.1rem; font-weight:700; margin:4px 0; color:{% if doc.verified %}#2e7d32{% else %}#555{% endif %};">
+          {% if doc.verified %}Verified{% else %}Not Verified{% endif %}
+        </p>
+        <p style="margin:0; color:#555; font-size:.85rem;">Document Status</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full OCR Text -->
+  <div class="card" style="border-radius:8px;">
+    <div class="card-content">
+      <span class="card-title" style="font-size:1.1rem; font-weight:600; color:#00695c;">
+        <i class="material-icons left teal-text">text_snippet</i>Extracted Text (Full OCR Output)
+      </span>
+      <div style="background:#fafafa; border:1px solid #e0e0e0; border-radius:6px; padding:20px; font-family:'Roboto Mono', 'Courier New', monospace; font-size:.83rem; line-height:1.9; white-space:pre-wrap; max-height:800px; overflow-y:auto; color:#212121;">{{ doc.ocr_text }}</div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="card-panel orange lighten-4" style="border-radius:8px; padding:20px;">
+    <p style="margin:0;">
+      <i class="material-icons left orange-text text-darken-3">warning</i>
+      <strong>No OCR text extracted yet.</strong>
+      Click <em>Re-run OCR</em> above to extract text from this document.
+      Supported formats: PDF, JPG, PNG, BMP, TIFF, DOCX.
+    </p>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+@media print {
+  .btn, .btn-flat, form { display: none !important; }
+  nav, .sidenav { display: none !important; }
+}
+</style>
+{% endblock %}

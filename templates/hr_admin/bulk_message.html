@@ -1,0 +1,220 @@
+{% extends 'hr_admin/base.html' %}
+{% load static %}
+
+{% block hr_content %}
+<!-- Header -->
+<div class="row" style="margin-bottom:16px;">
+  <div class="col s12">
+    <h5 style="color:#003087;font-weight:700;margin:0;">
+      <i class="material-icons" style="vertical-align:middle;margin-right:8px;">email</i>
+      Bulk Communication
+    </h5>
+    <p style="color:#666;margin:4px 0 0;">Send targeted messages to groups of applicants</p>
+  </div>
+</div>
+
+<div class="row">
+  <!-- LEFT COL: Send Form -->
+  <div class="col s12 m6">
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">send</i> Compose Message
+        </span>
+        <form method="post" action="{% url 'hr_admin:bulk_message' %}">
+          {% csrf_token %}
+
+          <!-- Vacancy Select -->
+          <div class="input-field">
+            <select id="id_vacancy" name="vacancy">
+              <option value="">All Vacancies</option>
+              {% for vacancy in vacancies %}
+                <option value="{{ vacancy.pk }}" {% if form.vacancy.value == vacancy.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ vacancy.title }} ({{ vacancy.reference_number }})
+                </option>
+              {% endfor %}
+            </select>
+            <label for="id_vacancy">Vacancy (optional)</label>
+          </div>
+
+          <!-- Recipient Status Select -->
+          <div class="input-field">
+            <select id="id_recipient_status" name="recipient_status" required>
+              <option value="" disabled selected>Select recipient group</option>
+              {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if form.recipient_status.value == value %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+              <option value="all">All Applicants</option>
+            </select>
+            <label for="id_recipient_status">Recipient Group *</label>
+          </div>
+
+          <!-- Subject -->
+          <div class="input-field">
+            <input type="text" id="id_subject" name="subject"
+                   value="{{ form.subject.value|default:'' }}"
+                   class="{% if form.subject.errors %}invalid{% endif %}"
+                   required>
+            <label for="id_subject">Email Subject *</label>
+            {% if form.subject.errors %}
+              <span class="helper-text red-text">{{ form.subject.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+
+          <!-- Message Body -->
+          <div class="input-field">
+            <textarea id="id_message" name="message"
+                      class="materialize-textarea {% if form.message.errors %}invalid{% endif %}"
+                      style="min-height:180px;" required>{{ form.message.value|default:'' }}</textarea>
+            <label for="id_message">Message Body *</label>
+            <span class="helper-text">
+              Use {name} for applicant name, {position} for vacancy title.
+            </span>
+            {% if form.message.errors %}
+              <span class="helper-text red-text">{{ form.message.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+            <span id="recipient-count" style="font-size:13px;color:#888;">
+              <i class="material-icons tiny">people</i>
+              {% if recipient_count %}{{ recipient_count }} recipient{{ recipient_count|pluralize }}{% else %}Select group to see count{% endif %}
+            </span>
+            <button type="submit" class="btn" style="background:#003087;">
+              <i class="material-icons left">send</i>Send Message
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COL: Templates + History -->
+  <div class="col s12 m6">
+
+    <!-- Quick Templates Card -->
+    <div class="card" style="border-radius:8px;margin-bottom:16px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">article</i> Quick Templates
+        </span>
+        <ul class="collection" style="border:none;margin:0;">
+          <li class="collection-item" style="padding:12px 0;cursor:pointer;"
+              onclick="fillTemplate('shortlist',
+                'Shortlisting Outcome – {position}',
+                'Dear {name},\n\nThank you for applying for the position of {position} with the Papua New Guinea Civil Service.\n\nWe are pleased to inform you that you have been shortlisted for this role. You will receive further details regarding the next steps in the selection process shortly.\n\nKind regards,\nPNGCS Recruitment Team')">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <i class="material-icons" style="color:#2e7d32;">star</i>
+              <div>
+                <div style="font-weight:600;font-size:13px;color:#003087;">Shortlisting Notification</div>
+                <div style="font-size:11px;color:#888;">Notify shortlisted candidates of outcome</div>
+              </div>
+              <i class="material-icons" style="margin-left:auto;color:#bbb;">arrow_forward</i>
+            </div>
+          </li>
+          <li class="collection-item" style="padding:12px 0;cursor:pointer;"
+              onclick="fillTemplate('interview',
+                'Interview Invitation – {position}',
+                'Dear {name},\n\nWe would like to invite you to attend an interview for the position of {position}.\n\nPlease wait for a separate communication with the interview date, time, and venue details. Kindly confirm your attendance by replying to this email.\n\nKind regards,\nPNGCS Recruitment Team')">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <i class="material-icons" style="color:#1565c0;">event</i>
+              <div>
+                <div style="font-weight:600;font-size:13px;color:#003087;">Interview Invitation</div>
+                <div style="font-size:11px;color:#888;">Invite candidates for interview</div>
+              </div>
+              <i class="material-icons" style="margin-left:auto;color:#bbb;">arrow_forward</i>
+            </div>
+          </li>
+          <li class="collection-item" style="padding:12px 0;cursor:pointer;border-bottom:none;"
+              onclick="fillTemplate('unsuccessful',
+                'Application Outcome – {position}',
+                'Dear {name},\n\nThank you for your interest in the position of {position} with the Papua New Guinea Civil Service and for taking the time to submit your application.\n\nAfter careful consideration, we regret to inform you that your application has not been successful on this occasion. We encourage you to apply for future vacancies that match your qualifications and experience.\n\nKind regards,\nPNGCS Recruitment Team')">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <i class="material-icons" style="color:#c62828;">cancel</i>
+              <div>
+                <div style="font-weight:600;font-size:13px;color:#003087;">Unsuccessful Notification</div>
+                <div style="font-size:11px;color:#888;">Notify unsuccessful applicants</div>
+              </div>
+              <i class="material-icons" style="margin-left:auto;color:#bbb;">arrow_forward</i>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Message History Card -->
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">history</i> Message History
+        </span>
+        {% if message_history %}
+          <ul class="collection" style="border:none;margin:0;">
+            {% for msg in message_history %}
+              <li class="collection-item" style="padding:10px 0;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div>
+                    <div style="font-weight:600;font-size:13px;color:#222;">{{ msg.subject }}</div>
+                    <div style="font-size:11px;color:#888;margin-top:2px;">
+                      To: <span style="color:#003087;">{{ msg.recipient_status_display }}</span>
+                      {% if msg.vacancy %}
+                        &bull; {{ msg.vacancy.title }}
+                      {% endif %}
+                    </div>
+                    <div style="font-size:11px;color:#aaa;margin-top:2px;">
+                      <i class="material-icons tiny">people</i> {{ msg.recipient_count }} recipients
+                      &bull; {{ msg.sent_at|date:"d M Y H:i" }}
+                    </div>
+                  </div>
+                  <span class="chip" style="background:#e8f5e9;color:#2e7d32;font-size:10px;margin-left:8px;">Sent</span>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div style="text-align:center;padding:30px;color:#ccc;">
+            <i class="material-icons" style="font-size:40px;">mail_outline</i>
+            <p style="font-size:13px;">No messages sent yet.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+    M.updateTextFields();
+  });
+
+  function fillTemplate(type, subject, message) {
+    var subjectEl = document.getElementById('id_subject');
+    var messageEl = document.getElementById('id_message');
+
+    if (subjectEl) {
+      subjectEl.value = subject;
+    }
+    if (messageEl) {
+      messageEl.value = message;
+      M.textareaAutoResize(messageEl);
+    }
+
+    // Trigger Materialize label update
+    M.updateTextFields();
+
+    // Scroll to form
+    document.getElementById('id_subject').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    M.toast({ html: 'Template loaded. Review and customise before sending.', classes: 'blue darken-4' });
+  }
+</script>
+{% endblock %}

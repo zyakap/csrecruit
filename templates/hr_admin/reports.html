@@ -1,0 +1,259 @@
+{% extends 'hr_admin/base.html' %}
+{% load static %}
+
+{% block hr_content %}
+<!-- Header -->
+<div class="row" style="margin-bottom:8px;">
+  <div class="col s12">
+    <h5 style="color:#003087;font-weight:700;margin:0;">
+      <i class="material-icons" style="vertical-align:middle;margin-right:8px;">bar_chart</i>
+      Reports &amp; Analytics
+    </h5>
+    <p style="color:#666;margin:4px 0 0;">Aggregate statistics across all vacancies and applications</p>
+  </div>
+</div>
+
+<!-- Vacancy Filter Form -->
+<div class="card" style="border-radius:8px;margin-bottom:16px;">
+  <div class="card-content" style="padding:16px 20px;">
+    <form method="get" action="">
+      <div class="row" style="margin-bottom:0;">
+        <div class="col s12 m4">
+          <div class="input-field" style="margin-top:0;">
+            <select id="vacancy-filter" name="vacancy">
+              <option value="">All Vacancies</option>
+              {% for v in vacancy_options %}
+                <option value="{{ v.pk }}" {% if request.GET.vacancy == v.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ v.title }}
+                </option>
+              {% endfor %}
+            </select>
+            <label for="vacancy-filter">Filter by Vacancy</label>
+          </div>
+        </div>
+        <div class="col s12 m3">
+          <div class="input-field" style="margin-top:0;">
+            <input type="date" id="date-from" name="date_from"
+                   value="{{ request.GET.date_from|default:'' }}">
+            <label for="date-from" class="{% if request.GET.date_from %}active{% endif %}">Date From</label>
+          </div>
+        </div>
+        <div class="col s12 m3">
+          <div class="input-field" style="margin-top:0;">
+            <input type="date" id="date-to" name="date_to"
+                   value="{{ request.GET.date_to|default:'' }}">
+            <label for="date-to" class="{% if request.GET.date_to %}active{% endif %}">Date To</label>
+          </div>
+        </div>
+        <div class="col s12 m2" style="display:flex;align-items:center;gap:8px;padding-top:8px;">
+          <button type="submit" class="btn" style="background:#003087;">
+            <i class="material-icons left">filter_list</i>Apply
+          </button>
+          <a href="{% url 'hr_admin:reports' %}" class="btn-flat" style="color:#666;">
+            <i class="material-icons">clear</i>
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Stat Chips Row -->
+<div class="row" style="margin-bottom:16px;">
+  <div class="col s12">
+    <span class="chip" style="background:#003087;color:#fff;font-size:13px;font-weight:700;margin-right:10px;padding:0 16px;height:36px;line-height:36px;">
+      <i class="material-icons tiny">description</i>&nbsp; Total Applications: {{ total_applications|default:"0" }}
+    </span>
+    <span class="chip" style="background:#1565c0;color:#fff;font-size:13px;font-weight:700;margin-right:10px;padding:0 16px;height:36px;line-height:36px;">
+      <i class="material-icons tiny">analytics</i>&nbsp; Avg Score: {{ avg_score|default:"N/A" }}
+    </span>
+    <span class="chip" style="background:#2e7d32;color:#fff;font-size:13px;font-weight:700;margin-right:10px;padding:0 16px;height:36px;line-height:36px;">
+      <i class="material-icons tiny">map</i>&nbsp; Provinces: {{ provinces_represented|default:"0" }}
+    </span>
+    <span class="chip" style="background:#6a1b9a;color:#fff;font-size:13px;font-weight:700;padding:0 16px;height:36px;line-height:36px;">
+      <i class="material-icons tiny">wc</i>&nbsp; Gender Groups: {{ gender_groups|default:"0" }}
+    </span>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row">
+  <!-- Province Bar Chart -->
+  <div class="col s12 m8">
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">bar_chart</i> Applications by Province
+        </span>
+        <canvas id="provinceChart" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gender + Status Collections -->
+  <div class="col s12 m4">
+    <!-- Gender Breakdown -->
+    <div class="card" style="border-radius:8px;margin-bottom:16px;">
+      <div class="card-content" style="padding-bottom:0;">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:15px;">
+          <i class="material-icons tiny">wc</i> Gender Breakdown
+        </span>
+      </div>
+      <ul class="collection" style="border:none;margin:0;">
+        {% for item in gender_breakdown %}
+          <li class="collection-item" style="padding:10px 20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:13px;">{{ item.label }}</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:80px;height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden;">
+                  <div style="width:{{ item.percentage }}%;height:100%;background:#003087;border-radius:3px;"></div>
+                </div>
+                <span class="badge new" style="background:#003087;min-width:28px;">{{ item.count }}</span>
+              </div>
+            </div>
+          </li>
+        {% empty %}
+          <li class="collection-item" style="color:#aaa;text-align:center;font-size:13px;">No data</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Status Breakdown -->
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content" style="padding-bottom:0;">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:15px;">
+          <i class="material-icons tiny">donut_small</i> Status Breakdown
+        </span>
+      </div>
+      <ul class="collection" style="border:none;margin:0;">
+        {% for item in status_breakdown %}
+          <li class="collection-item" style="padding:10px 20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span class="chip s-{{ item.status }}" style="font-size:11px;">{{ item.label }}</span>
+              <span class="badge new" style="background:#003087;min-width:28px;">{{ item.count }}</span>
+            </div>
+          </li>
+        {% empty %}
+          <li class="collection-item" style="color:#aaa;text-align:center;font-size:13px;">No data</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Qualification + Provincial Distribution Row -->
+<div class="row">
+  <!-- Qualification Breakdown -->
+  <div class="col s12 m6">
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content" style="padding-bottom:0;">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">school</i> Qualification Breakdown
+        </span>
+      </div>
+      <ul class="collection" style="border:none;margin:0;">
+        {% for item in qualification_breakdown %}
+          <li class="collection-item" style="padding:12px 20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <span class="chip" style="background:#e3eaf6;color:#003087;font-size:11px;">
+                  {{ item.label }}
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:100px;height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden;">
+                  <div style="width:{{ item.percentage }}%;height:100%;background:#003087;border-radius:3px;"></div>
+                </div>
+                <span style="font-size:13px;font-weight:700;color:#003087;min-width:24px;text-align:right;">{{ item.count }}</span>
+                <span style="font-size:11px;color:#aaa;">({{ item.percentage }}%)</span>
+              </div>
+            </div>
+          </li>
+        {% empty %}
+          <li class="collection-item" style="color:#aaa;text-align:center;font-size:13px;padding:20px;">No data</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Provincial Distribution Table -->
+  <div class="col s12 m6">
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">place</i> Provincial Distribution
+        </span>
+        {% if province_distribution %}
+          <table style="font-size:13px;width:100%;">
+            <thead style="background:#f5f6fa;">
+              <tr>
+                <th style="color:#003087;">Province</th>
+                <th style="color:#003087;text-align:right;">Applications</th>
+                <th style="color:#003087;text-align:right;">%</th>
+                <th style="color:#003087;width:120px;">Distribution</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in province_distribution %}
+                <tr>
+                  <td style="padding:8px 4px;">{{ item.province }}</td>
+                  <td style="text-align:right;font-weight:700;color:#003087;">{{ item.count }}</td>
+                  <td style="text-align:right;color:#888;font-size:12px;">{{ item.percentage }}%</td>
+                  <td style="padding:8px 4px;">
+                    <div style="width:100%;height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden;">
+                      <div style="width:{{ item.percentage }}%;height:100%;background:#003087;border-radius:4px;transition:width 0.3s;"></div>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div style="text-align:center;padding:30px;color:#ccc;">
+            <i class="material-icons" style="font-size:40px;">map</i>
+            <p style="font-size:13px;">No provincial data available.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+
+    const provinceLabels = {{ province_labels|safe }};
+    const provinceCounts = {{ province_counts|safe }};
+
+    new Chart(document.getElementById('provinceChart'), {
+      type: 'bar',
+      data: {
+        labels: provinceLabels,
+        datasets: [{
+          label: 'Applications',
+          data: provinceCounts,
+          backgroundColor: '#003087',
+          hoverBackgroundColor: '#1565c0',
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y + ' applications' } }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

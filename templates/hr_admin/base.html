@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row" style="margin-top:0;">
+  <!-- Sidebar -->
+  <div class="col s12 m2" style="padding:0;">
+    <div class="hr-side" style="background:#003087;min-height:calc(100vh - 64px);padding-top:16px;">
+      <div class="side-label" style="color:#90bff9;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:8px 16px 4px;">Navigation</div>
+
+      <a href="{% url 'hr_admin:dashboard' %}"
+         class="side-item{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}"
+         style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:#cde;text-decoration:none;font-size:14px;transition:background .2s;{% if request.resolver_match.url_name == 'dashboard' %}background:rgba(255,255,255,0.18);border-left:3px solid #fff;{% endif %}">
+        <i class="material-icons" style="font-size:20px;">speed</i> Dashboard
+      </a>
+
+      <a href="{% url 'hr_admin:vacancy_list' %}"
+         class="side-item{% if request.resolver_match.url_name == 'vacancy_list' or request.resolver_match.url_name == 'vacancy_create' or request.resolver_match.url_name == 'vacancy_edit' %} active{% endif %}"
+         style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:#cde;text-decoration:none;font-size:14px;transition:background .2s;{% if request.resolver_match.url_name == 'vacancy_list' or request.resolver_match.url_name == 'vacancy_create' or request.resolver_match.url_name == 'vacancy_edit' %}background:rgba(255,255,255,0.18);border-left:3px solid #fff;{% endif %}">
+        <i class="material-icons" style="font-size:20px;">work</i> Vacancies
+      </a>
+
+      <a href="{% url 'hr_admin:application_list' %}"
+         class="side-item{% if request.resolver_match.url_name == 'application_list' or request.resolver_match.url_name == 'application_detail' %} active{% endif %}"
+         style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:#cde;text-decoration:none;font-size:14px;transition:background .2s;{% if request.resolver_match.url_name == 'application_list' or request.resolver_match.url_name == 'application_detail' %}background:rgba(255,255,255,0.18);border-left:3px solid #fff;{% endif %}">
+        <i class="material-icons" style="font-size:20px;">description</i> Applications
+      </a>
+
+      <a href="{% url 'hr_admin:bulk_message' %}"
+         class="side-item{% if request.resolver_match.url_name == 'bulk_message' %} active{% endif %}"
+         style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:#cde;text-decoration:none;font-size:14px;transition:background .2s;{% if request.resolver_match.url_name == 'bulk_message' %}background:rgba(255,255,255,0.18);border-left:3px solid #fff;{% endif %}">
+        <i class="material-icons" style="font-size:20px;">email</i> Bulk Messages
+      </a>
+
+      <a href="{% url 'hr_admin:reports' %}"
+         class="side-item{% if request.resolver_match.url_name == 'reports' %} active{% endif %}"
+         style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:#cde;text-decoration:none;font-size:14px;transition:background .2s;{% if request.resolver_match.url_name == 'reports' %}background:rgba(255,255,255,0.18);border-left:3px solid #fff;{% endif %}">
+        <i class="material-icons" style="font-size:20px;">bar_chart</i> Reports
+      </a>
+
+      <div class="side-label" style="color:#90bff9;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:24px 16px 4px;">System</div>
+
+      <a href="{% url 'recruitment:home' %}"
+         class="side-item"
+         style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:#cde;text-decoration:none;font-size:14px;transition:background .2s;">
+        <i class="material-icons" style="font-size:20px;">arrow_back</i> Public Portal
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="col s12 m10" style="padding:24px 20px;background:#f5f6fa;min-height:calc(100vh - 64px);">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="msg-flash {% if message.tags %}{{ message.tags }}{% endif %}" style="margin-bottom:12px;">
+          <i class="material-icons tiny">info</i> {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+    {% block hr_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'hr_admin/base.html' %}
+{% load static %}
+
+{% block hr_content %}
+<!-- Header -->
+<div class="row" style="margin-bottom:8px;align-items:center;">
+  <div class="col s12 m8">
+    <h5 style="color:#003087;font-weight:700;margin:0;">
+      <i class="material-icons" style="vertical-align:middle;margin-right:8px;">inbox</i>
+      Applications Inbox
+    </h5>
+    <p style="color:#666;margin:4px 0 0;">
+      Showing {{ applications.paginator.count|default:"0" }} application{{ applications.paginator.count|pluralize }}
+    </p>
+  </div>
+  <div class="col s12 m4 right-align" style="padding-top:8px;">
+    {% if request.GET.vacancy %}
+      <a href="{% url 'hr_admin:bulk_ocr_vacancy' request.GET.vacancy %}"
+         class="btn teal waves-effect waves-light tooltipped"
+         data-position="bottom"
+         data-tooltip="Run OCR on all documents for all applications in this vacancy and generate summaries">
+        <i class="material-icons left">document_scanner</i>Bulk OCR — This Vacancy
+      </a>
+    {% else %}
+      <span class="tooltipped" data-position="bottom"
+            data-tooltip="Filter by a specific vacancy first, then use Bulk OCR to process all its applications">
+        <a href="#!" class="btn grey lighten-1 disabled">
+          <i class="material-icons left">document_scanner</i>Bulk OCR
+        </a>
+      </span>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Filter Form -->
+<div class="card" style="border-radius:8px;margin-bottom:16px;">
+  <div class="card-content" style="padding:16px 20px;">
+    <form method="get" action="">
+      <div class="row" style="margin-bottom:0;">
+        <!-- Vacancy Filter -->
+        <div class="col s12 m3">
+          <div class="input-field" style="margin-top:0;">
+            <select name="vacancy" id="vacancy-filter">
+              <option value="">All Vacancies</option>
+              {% for v in vacancy_options %}
+                <option value="{{ v.pk }}" {% if request.GET.vacancy == v.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ v.title }}
+                </option>
+              {% endfor %}
+            </select>
+            <label for="vacancy-filter">Vacancy</label>
+          </div>
+        </div>
+        <!-- Status Filter -->
+        <div class="col s12 m2">
+          <div class="input-field" style="margin-top:0;">
+            <select name="status" id="status-filter">
+              <option value="">All Statuses</option>
+              {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label for="status-filter">Status</label>
+          </div>
+        </div>
+        <!-- Province Filter -->
+        <div class="col s12 m2">
+          <div class="input-field" style="margin-top:0;">
+            <select name="province" id="province-filter">
+              <option value="">All Provinces</option>
+              {% for value, label in province_choices %}
+                <option value="{{ value }}" {% if request.GET.province == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label for="province-filter">Province</label>
+          </div>
+        </div>
+        <!-- Search -->
+        <div class="col s12 m3">
+          <div class="input-field" style="margin-top:0;">
+            <input type="text" id="search-input" name="q"
+                   value="{{ request.GET.q|default:'' }}"
+                   placeholder="Search name or email...">
+            <label for="search-input">Search</label>
+          </div>
+        </div>
+        <!-- Buttons -->
+        <div class="col s12 m2" style="display:flex;align-items:center;gap:8px;padding-top:8px;">
+          <button type="submit" class="btn" style="background:#003087;">
+            <i class="material-icons left">search</i>Filter
+          </button>
+          <a href="{% url 'hr_admin:application_list' %}" class="btn-flat" style="color:#003087;">
+            <i class="material-icons">clear</i>
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Applications Table -->
+<div class="card" style="border-radius:8px;">
+  <div class="card-content" style="padding:0;">
+    {% if applications %}
+      <div class="responsive-table">
+        <table class="striped hoverable" style="font-size:13px;">
+          <thead style="background:#003087;">
+            <tr>
+              <th style="color:#fff;width:40px;">#</th>
+              <th style="color:#fff;">Name / Email</th>
+              <th style="color:#fff;">Position</th>
+              <th style="color:#fff;">Province</th>
+              <th style="color:#fff;">Qualification</th>
+              <th style="color:#fff;">Score</th>
+              <th style="color:#fff;">Submitted</th>
+              <th style="color:#fff;">Status</th>
+              <th style="color:#fff;text-align:center;">View</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for app in applications %}
+              <tr>
+                <td style="color:#999;font-size:12px;">
+                  {{ forloop.counter|add:applications.start_index|add:"-1" }}
+                </td>
+                <td>
+                  <div style="font-weight:600;color:#222;">{{ app.full_name }}</div>
+                  <div style="font-size:11px;color:#888;">{{ app.email }}</div>
+                </td>
+                <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                    title="{{ app.vacancy.title }}">
+                  {{ app.vacancy.title }}
+                </td>
+                <td style="white-space:nowrap;font-size:12px;">{{ app.province }}</td>
+                <td>
+                  <span class="chip" style="background:#e3eaf6;color:#003087;font-size:11px;">
+                    {{ app.get_qualification_display }}
+                  </span>
+                </td>
+                <td>
+                  {% if app.score is not None %}
+                    {% if app.score >= 70 %}
+                      <span class="chip score-hi" style="font-size:11px;min-width:40px;justify-content:center;">{{ app.score }}</span>
+                    {% elif app.score >= 50 %}
+                      <span class="chip score-md" style="font-size:11px;min-width:40px;justify-content:center;">{{ app.score }}</span>
+                    {% else %}
+                      <span class="chip score-lo" style="font-size:11px;min-width:40px;justify-content:center;">{{ app.score }}</span>
+                    {% endif %}
+                  {% else %}
+                    <span class="chip" style="font-size:11px;background:#eee;color:#aaa;">N/A</span>
+                  {% endif %}
+                </td>
+                <td style="white-space:nowrap;font-size:12px;color:#666;">
+                  {{ app.submitted_at|date:"d M Y" }}<br>
+                  <span style="font-size:11px;">{{ app.submitted_at|time:"H:i" }}</span>
+                </td>
+                <td>
+                  <span class="chip s-{{ app.status }}" style="font-size:11px;">
+                    {{ app.get_status_display }}
+                  </span>
+                </td>
+                <td style="text-align:center;">
+                  <a href="{% url 'hr_admin:application_detail' app.pk %}"
+                     class="btn-small tooltipped" data-position="top" data-tooltip="View Application"
+                     style="background:#003087;padding:0 10px;margin-right:4px;">
+                    <i class="material-icons" style="font-size:14px;">visibility</i>
+                  </a>
+                  <a href="{% url 'hr_admin:application_summary' app.pk %}"
+                     class="btn-small tooltipped" data-position="top" data-tooltip="Full Summary + OCR"
+                     style="background:#00695c;padding:0 10px;">
+                    <i class="material-icons" style="font-size:14px;">summarize</i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state" style="padding:80px 40px;text-align:center;color:#aaa;">
+        <i class="material-icons" style="font-size:72px;color:#e0e0e0;">inbox</i>
+        <h6 style="color:#bbb;margin:16px 0 8px;">No applications found</h6>
+        <p style="font-size:14px;color:#ccc;">
+          {% if request.GET.vacancy or request.GET.status or request.GET.province or request.GET.q %}
+            No applications match the current filters.
+            <a href="{% url 'hr_admin:application_list' %}" style="color:#003087;">Clear all filters</a>
+          {% else %}
+            Applications will appear here once candidates start applying.
+          {% endif %}
+        </p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if applications.has_other_pages %}
+  <div style="text-align:center;margin-top:16px;">
+    <ul class="pagination">
+      {% if applications.has_previous %}
+        <li class="waves-effect">
+          <a href="?page={{ applications.previous_page_number }}&vacancy={{ request.GET.vacancy }}&status={{ request.GET.status }}&province={{ request.GET.province }}&q={{ request.GET.q }}">
+            <i class="material-icons">chevron_left</i>
+          </a>
+        </li>
+      {% else %}
+        <li class="disabled"><a><i class="material-icons">chevron_left</i></a></li>
+      {% endif %}
+      {% for num in applications.paginator.page_range %}
+        {% if applications.number == num %}
+          <li class="active" style="background:#003087;"><a>{{ num }}</a></li>
+        {% else %}
+          <li class="waves-effect">
+            <a href="?page={{ num }}&vacancy={{ request.GET.vacancy }}&status={{ request.GET.status }}&province={{ request.GET.province }}&q={{ request.GET.q }}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+      {% if applications.has_next %}
+        <li class="waves-effect">
+          <a href="?page={{ applications.next_page_number }}&vacancy={{ request.GET.vacancy }}&status={{ request.GET.status }}&province={{ request.GET.province }}&q={{ request.GET.q }}">
+            <i class="material-icons">chevron_right</i>
+          </a>
+        </li>
+      {% else %}
+        <li class="disabled"><a><i class="material-icons">chevron_right</i></a></li>
+      {% endif %}
+    </ul>
+  </div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+  });
+</script>
+{% endblock %}

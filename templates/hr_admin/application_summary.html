@@ -1,0 +1,265 @@
+{% extends 'hr_admin/base.html' %}
+
+{% block title %}Application Summary — {{ application.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:900px; margin:0 auto; padding: 20px 16px 60px;">
+
+  <!-- Page Header -->
+  <div class="row" style="margin-bottom:24px;">
+    <div class="col s12">
+      <a href="{% url 'hr_admin:application_detail' application.pk %}" class="btn-flat waves-effect">
+        <i class="material-icons left">arrow_back</i>Back to Application
+      </a>
+    </div>
+  </div>
+
+  <!-- Title Card -->
+  <div class="card teal darken-2 white-text" style="border-radius:8px;">
+    <div class="card-content">
+      <div class="row valign-wrapper" style="margin:0;">
+        <div class="col s1">
+          <i class="material-icons" style="font-size:48px; opacity:0.7;">assignment_ind</i>
+        </div>
+        <div class="col s11" style="padding-left:20px;">
+          <h5 style="margin:0; font-weight:600;">Application Summary</h5>
+          <p style="margin:4px 0 0; opacity:0.85;">
+            {{ application.full_name }} &mdash; {{ application.vacancy.title }}
+            &nbsp;|&nbsp; Ref: {{ application.vacancy.reference_number }}
+            &nbsp;|&nbsp; #{{ application.pk }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="card" style="border-radius:8px;">
+    <div class="card-content" style="padding:16px 20px;">
+      <span class="card-title" style="font-size:1rem; font-weight:600; margin-bottom:10px; display:block;">
+        <i class="material-icons left teal-text">tune</i>OCR & Summary Actions
+      </span>
+      <form method="post" action="{% url 'hr_admin:application_detail' application.pk %}" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="ocr_all">
+        <button type="submit" class="btn teal waves-effect waves-light" style="margin-right:8px; margin-bottom:8px;">
+          <i class="material-icons left">document_scanner</i>Re-run OCR on All Docs
+        </button>
+      </form>
+      <form method="post" action="{% url 'hr_admin:application_detail' application.pk %}" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="regenerate_summary">
+        <button type="submit" class="btn blue waves-effect waves-light" style="margin-right:8px; margin-bottom:8px;">
+          <i class="material-icons left">refresh</i>Regenerate Summary
+        </button>
+      </form>
+      <button onclick="window.print();" class="btn grey darken-1 waves-effect waves-light" style="margin-bottom:8px;">
+        <i class="material-icons left">print</i>Print Summary
+      </button>
+    </div>
+  </div>
+
+  <!-- Score Badge -->
+  {% if application.total_score is not None %}
+  <div class="card" style="border-radius:8px; border-left: 5px solid
+    {% if application.total_score >= 80 %}#00897b{% elif application.total_score >= 65 %}#1e88e5{% elif application.total_score >= 50 %}#fb8c00{% else %}#e53935{% endif %};">
+    <div class="card-content" style="padding: 14px 20px;">
+      <div class="row valign-wrapper" style="margin:0;">
+        <div class="col s8">
+          <strong>Automated Screening Score</strong>
+          <p style="margin:2px 0 0; color:#555; font-size:.9rem;">
+            Education 30% &bull; Grade 25% &bull; Experience 20% &bull; Province 10% &bull; Completeness 15%
+          </p>
+        </div>
+        <div class="col s4 right-align">
+          <span style="font-size:2.2rem; font-weight:700;
+            color: {% if application.total_score >= 80 %}#00897b{% elif application.total_score >= 65 %}#1e88e5{% elif application.total_score >= 50 %}#fb8c00{% else %}#e53935{% endif %};">
+            {{ application.total_score }}<span style="font-size:1.2rem;">/100</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Personal Details -->
+  <div class="card" style="border-radius:8px;">
+    <div class="card-content">
+      <span class="card-title" style="font-size:1.1rem; font-weight:600; color:#00695c;">
+        <i class="material-icons left teal-text">person</i>Personal Details
+      </span>
+      <div class="row" style="margin:0;">
+        <div class="col s12 m6">
+          <table class="striped" style="font-size:.9rem;">
+            <tr><th style="width:40%">Full Name</th><td>{{ application.full_name }}</td></tr>
+            <tr><th>Gender</th><td>{{ application.gender }}</td></tr>
+            <tr><th>Age</th><td>{{ application.get_age }} years</td></tr>
+            <tr><th>Province</th><td>{{ application.province }}</td></tr>
+          </table>
+        </div>
+        <div class="col s12 m6">
+          <table class="striped" style="font-size:.9rem;">
+            <tr><th style="width:40%">Nationality</th><td>{{ application.nationality }}</td></tr>
+            <tr><th>Phone</th><td>{{ application.phone }}</td></tr>
+            <tr><th>Email</th><td>{{ application.email }}</td></tr>
+            <tr><th>Address</th><td>{{ application.address }}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Education & Experience -->
+  <div class="row">
+    <div class="col s12 m6">
+      <div class="card" style="border-radius:8px; height:100%;">
+        <div class="card-content">
+          <span class="card-title" style="font-size:1.1rem; font-weight:600; color:#00695c;">
+            <i class="material-icons left teal-text">school</i>Education
+          </span>
+          <table class="striped" style="font-size:.9rem;">
+            <tr><th>Qualification</th><td>{{ application.get_highest_qualification_display }}</td></tr>
+            <tr><th>Institution</th><td>{{ application.institution }}</td></tr>
+            <tr><th>Year</th><td>{{ application.year_completed }}</td></tr>
+            <tr><th>Result/Grade</th><td>{{ application.grade_result }}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col s12 m6">
+      <div class="card" style="border-radius:8px; height:100%;">
+        <div class="card-content">
+          <span class="card-title" style="font-size:1.1rem; font-weight:600; color:#00695c;">
+            <i class="material-icons left teal-text">work</i>Work Experience
+          </span>
+          <table class="striped" style="font-size:.9rem;">
+            <tr><th>Years</th><td>{{ application.years_experience }}</td></tr>
+            <tr><th>Current Employer</th><td>{{ application.current_employer|default:"—" }}</td></tr>
+            <tr><th>Current Position</th><td>{{ application.current_position|default:"—" }}</td></tr>
+          </table>
+          {% if application.work_history %}
+          <p style="margin-top:10px; font-size:.85rem; color:#444;">{{ application.work_history|truncatechars:300 }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cover Letter -->
+  {% if application.cover_letter %}
+  <div class="card" style="border-radius:8px;">
+    <div class="card-content">
+      <span class="card-title" style="font-size:1.1rem; font-weight:600; color:#00695c;">
+        <i class="material-icons left teal-text">email</i>Cover Letter
+      </span>
+      <p style="white-space:pre-wrap; font-size:.9rem; color:#444; background:#f9f9f9; padding:14px; border-radius:4px; line-height:1.7;">{{ application.cover_letter }}</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- References -->
+  <div class="card" style="border-radius:8px;">
+    <div class="card-content">
+      <span class="card-title" style="font-size:1.1rem; font-weight:600; color:#00695c;">
+        <i class="material-icons left teal-text">contacts</i>References
+      </span>
+      <div class="row">
+        <div class="col s12 m6">
+          <p><strong>1. {{ application.reference1_name }}</strong><br>
+          {{ application.reference1_position }}<br>
+          <i class="material-icons tiny">phone</i> {{ application.reference1_phone }}</p>
+        </div>
+        {% if application.reference2_name %}
+        <div class="col s12 m6">
+          <p><strong>2. {{ application.reference2_name }}</strong><br>
+          {{ application.reference2_position }}<br>
+          <i class="material-icons tiny">phone</i> {{ application.reference2_phone }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents & OCR -->
+  <div class="card" style="border-radius:8px;">
+    <div class="card-content">
+      <span class="card-title" style="font-size:1.1rem; font-weight:600; color:#00695c;">
+        <i class="material-icons left teal-text">document_scanner</i>Uploaded Documents &amp; OCR Analysis
+      </span>
+      {% if documents %}
+        {% for doc in documents %}
+        <div class="card-panel" style="border-radius:6px; border-left:4px solid
+          {% if doc.verified %}#43a047{% else %}#90a4ae{% endif %}; margin-bottom:14px; padding:14px;">
+          <div class="row valign-wrapper" style="margin:0 0 8px;">
+            <div class="col s8">
+              <strong>
+                <i class="material-icons tiny">attachment</i>
+                {{ doc.get_doc_type_display }}
+              </strong>
+              &nbsp;&mdash;&nbsp; <span style="font-size:.85rem; color:#555;">{{ doc.filename }}</span>
+              {% if doc.verified %}
+              <span class="badge new green white-text" style="margin-left:8px;" data-badge-caption="">Verified</span>
+              {% endif %}
+            </div>
+            <div class="col s4 right-align">
+              <a href="{% url 'hr_admin:document_ocr' doc.pk %}" class="btn-small blue waves-effect">
+                <i class="material-icons left">visibility</i>View OCR Text
+              </a>
+            </div>
+          </div>
+          {% if doc.ocr_text %}
+            <p style="font-size:.8rem; color:#555; margin:4px 0;">
+              <i class="material-icons tiny teal-text">check_circle</i>
+              <strong>{{ doc.ocr_text.split|length }} words</strong> extracted via OCR &mdash;
+              Uploaded {{ doc.uploaded_at|date:"d M Y" }}
+            </p>
+            <!-- OCR snippet preview -->
+            <div style="background:#f5f5f5; padding:10px 14px; border-radius:4px; margin-top:8px; font-size:.82rem; color:#333; font-family:monospace; max-height:120px; overflow:hidden;">
+              {{ doc.ocr_text|truncatechars:600 }}
+            </div>
+            <a href="{% url 'hr_admin:document_ocr' doc.pk %}" style="font-size:.8rem; color:#1976d2;">Read full OCR text &rarr;</a>
+          {% else %}
+            <p style="font-size:.85rem; color:#888; margin:4px 0;">
+              <i class="material-icons tiny orange-text">warning</i>
+              No OCR text yet. Run OCR to extract text from this document.
+            </p>
+            <form method="post" action="{% url 'hr_admin:application_detail' application.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="ocr_doc">
+              <input type="hidden" name="doc_id" value="{{ doc.pk }}">
+              <button type="submit" class="btn-small teal waves-effect">
+                <i class="material-icons left">document_scanner</i>Run OCR
+              </button>
+            </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="grey-text"><i class="material-icons tiny">info</i> No documents uploaded by this applicant.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Full Text Summary -->
+  {% if application.ai_summary %}
+  <div class="card" style="border-radius:8px;">
+    <div class="card-content">
+      <span class="card-title" style="font-size:1.1rem; font-weight:600; color:#00695c;">
+        <i class="material-icons left teal-text">summarize</i>Full Application Summary
+      </span>
+      <pre style="white-space:pre-wrap; font-family:'Roboto Mono', monospace; font-size:.82rem; background:#f5f5f5; padding:16px; border-radius:6px; line-height:1.7; overflow-x:auto; color:#212121;">{{ application.ai_summary }}</pre>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+@media print {
+  .btn, .btn-flat, .btn-small, form { display: none !important; }
+  nav, .sidenav { display: none !important; }
+  .card { box-shadow: none !important; border: 1px solid #ddd; }
+  body { font-size: 11pt; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PNGCS Recruitment Portal{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root { --pngcs-navy: #003087; --pngcs-gold: #FFD700; --pngcs-red: #C8102E; }
+        body { font-family: 'Roboto', sans-serif; background: #f5f5f5; }
+        nav.pngcs-nav { background: var(--pngcs-navy); }
+        nav.pngcs-nav .brand-logo { font-weight: 700; }
+        nav.pngcs-nav .brand-logo .gold { color: var(--pngcs-gold); }
+        nav.pngcs-nav ul a { color: #fff; font-weight: 500; }
+        nav.pngcs-nav ul a:hover { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .sidenav-brand { background: var(--pngcs-navy); padding: 24px 16px; }
+        .sidenav-brand h6 { color: #fff; font-weight: 700; margin: 0; }
+        .sidenav-brand small { color: rgba(255,255,255,0.6); font-size: 0.78rem; }
+        .hero-banner { background: linear-gradient(135deg, #003087 0%, #1a4db3 60%, #c8102e 100%); padding: 64px 0 48px; }
+        .hero-banner h1 { font-size: 2.4rem; font-weight: 700; color: #fff; }
+        .hero-banner p { color: rgba(255,255,255,0.85); font-size: 1.1rem; }
+        .btn.pngcs { background: var(--pngcs-navy); }
+        .btn.pngcs:hover, .btn.pngcs:focus { background: #1a4db3; }
+        .btn-flat.pngcs-flat { color: var(--pngcs-navy); }
+        .card { border-radius: 8px; }
+        .card-header { background: var(--pngcs-navy); padding: 16px 20px; border-radius: 8px 8px 0 0; }
+        .card-header h5, .card-header h6, .card-header span { color: #fff; font-weight: 600; }
+        .card-header small { color: rgba(255,255,255,0.65); display: block; margin-top: 2px; }
+        .stat-card { border-radius: 8px; color: #fff; padding: 20px; }
+        .stat-card .stat-val { font-size: 2.6rem; font-weight: 700; line-height: 1; }
+        .stat-card .stat-label { font-size: 0.88rem; opacity: 0.85; margin-top: 4px; }
+        .stat-card i.big-icon { font-size: 3rem; opacity: 0.25; float: right; margin-top: -4px; }
+        .chip { font-weight: 600; font-size: 0.75rem; }
+        .chip.s-submitted { background: #9e9e9e; color: #fff; }
+        .chip.s-under_review { background: #1976d2; color: #fff; }
+        .chip.s-shortlisted { background: #3949ab; color: #fff; }
+        .chip.s-interview_scheduled { background: #f57c00; color: #fff; }
+        .chip.s-interviewed { background: #0097a7; color: #fff; }
+        .chip.s-selected { background: #388e3c; color: #fff; }
+        .chip.s-rejected { background: #c62828; color: #fff; }
+        .chip.score-hi { background: #388e3c; color: #fff; }
+        .chip.score-md { background: #f57c00; color: #fff; }
+        .chip.score-lo { background: #c62828; color: #fff; }
+        .section-divider { font-size: 0.72rem; font-weight: 700; color: var(--pngcs-navy); text-transform: uppercase; letter-spacing: 1px; padding-bottom: 8px; border-bottom: 2px solid var(--pngcs-navy); margin: 24px 0 16px; display: flex; align-items: center; gap: 6px; }
+        .msg-flash { padding: 12px 16px; border-radius: 6px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+        .msg-flash.success { background: #e8f5e9; color: #2e7d32; border-left: 3px solid #4caf50; }
+        .msg-flash.error { background: #ffebee; color: #b71c1c; border-left: 3px solid #ef5350; }
+        .msg-flash.warning { background: #fff8e1; color: #e65100; border-left: 3px solid #ffa726; }
+        .msg-flash.info { background: #e3f2fd; color: #0d47a1; border-left: 3px solid #42a5f5; }
+        .progress-tracker { display: flex; margin: 20px 0; }
+        .pt-step { flex: 1; text-align: center; position: relative; }
+        .pt-step:not(:first-child)::before { content: ''; position: absolute; top: 17px; right: 50%; width: 100%; height: 2px; background: #e0e0e0; z-index: 0; }
+        .pt-step:not(:first-child).done::before { background: #4caf50; }
+        .pt-circle { width: 34px; height: 34px; border-radius: 50%; background: #e0e0e0; color: #9e9e9e; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 0.75rem; font-weight: 700; position: relative; z-index: 1; }
+        .pt-circle.active { background: var(--pngcs-navy); color: #fff; }
+        .pt-circle.done { background: #4caf50; color: #fff; }
+        .pt-label { font-size: 0.62rem; color: #757575; font-weight: 500; text-transform: uppercase; }
+        .notif-row { padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px; border-bottom: 1px solid #f0f0f0; }
+        .notif-row.unread { background: #e8eaf6; }
+        .notif-dot { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .notif-dot.success { background: #e8f5e9; color: #43a047; }
+        .notif-dot.info { background: #e3f2fd; color: #1e88e5; }
+        .notif-dot.interview { background: #f3e5f5; color: #8e24aa; }
+        .notif-dot.warning { background: #fff8e1; color: #fb8c00; }
+        .hr-side { background: #fff; min-height: calc(100vh - 64px); box-shadow: 1px 0 4px rgba(0,0,0,0.08); }
+        .hr-side .side-item { padding: 12px 16px; display: flex; align-items: center; gap: 12px; color: #424242; text-decoration: none; font-weight: 500; font-size: 0.9rem; border-bottom: 1px solid #f5f5f5; }
+        .hr-side .side-item i { color: #9e9e9e; font-size: 1.1rem; }
+        .hr-side .side-item:hover { background: #f5f5f5; }
+        .hr-side .side-item.active { background: #e8eaf6; color: var(--pngcs-navy); border-left: 3px solid var(--pngcs-navy); }
+        .hr-side .side-item.active i { color: var(--pngcs-navy); }
+        .hr-side .side-label { padding: 14px 16px 6px; font-size: 0.68rem; font-weight: 700; color: #bdbdbd; text-transform: uppercase; letter-spacing: 1px; }
+        .job-card { transition: box-shadow 0.2s, transform 0.2s; }
+        .job-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,48,135,0.14) !important; }
+        .job-icon { width: 50px; height: 50px; background: #e8eaf6; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .job-icon i { color: var(--pngcs-navy); font-size: 1.5rem; }
+        .input-field label { color: #757575; }
+        .input-field input:focus + label, .input-field textarea:focus + label { color: var(--pngcs-navy) !important; }
+        .input-field input:focus, .input-field textarea:focus { border-bottom-color: var(--pngcs-navy) !important; box-shadow: 0 1px 0 0 var(--pngcs-navy) !important; }
+        .empty-state { text-align: center; padding: 48px 24px; }
+        .empty-state i { font-size: 4rem; color: #e0e0e0; }
+        .empty-state p { color: #9e9e9e; margin-top: 8px; }
+        .score-display { font-size: 3.5rem; font-weight: 700; line-height: 1; }
+        .score-display.hi { color: #43a047; }
+        .score-display.md { color: #fb8c00; }
+        .score-display.lo { color: #e53935; }
+        .ai-summary-box { background: #e3f2fd; border-left: 4px solid #42a5f5; border-radius: 0 6px 6px 0; padding: 12px 16px; font-size: 0.88rem; color: #0d47a1; }
+        table.striped > tbody > tr:nth-child(odd) { background: #fafafa; }
+        table th { color: #546e7a; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+        footer.page-footer { background: var(--pngcs-navy); margin-top: 64px; }
+        footer .footer-copyright { background: rgba(0,0,0,0.18); }
+        @media only screen and (max-width: 600px) { .hero-banner h1 { font-size: 1.6rem; } }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Mobile Sidenav -->
+<ul id="side-nav" class="sidenav">
+    <li>
+        <div class="sidenav-brand">
+            <h6><span style="color: var(--pngcs-gold);">PNGCS</span> Recruitment</h6>
+            <small>Papua New Guinea Correctional Service</small>
+        </div>
+    </li>
+    <li><a href="{% url 'recruitment:job_list' %}" class="waves-effect"><i class="material-icons">work_outline</i>Job Vacancies</a></li>
+    {% if user.is_authenticated %}
+        {% if user.profile.role == 'applicant' %}
+        <li><a href="{% url 'recruitment:dashboard' %}" class="waves-effect"><i class="material-icons">dashboard</i>My Dashboard</a></li>
+        {% endif %}
+        {% if user.profile.role == 'hr_admin' or user.is_superuser %}
+        <li><a href="{% url 'hr_admin:dashboard' %}" class="waves-effect"><i class="material-icons">admin_panel_settings</i>HR Admin</a></li>
+        {% endif %}
+        {% if user.profile.role == 'panel_member' %}
+        <li><a href="{% url 'panel:dashboard' %}" class="waves-effect"><i class="material-icons">assignment_turned_in</i>Panel Portal</a></li>
+        {% endif %}
+        <li><div class="divider"></div></li>
+        <li><a href="{% url 'accounts:profile' %}" class="waves-effect"><i class="material-icons">manage_accounts</i>Profile</a></li>
+        <li><a href="{% url 'accounts:logout' %}" class="waves-effect"><i class="material-icons">logout</i>Logout</a></li>
+    {% else %}
+        <li><a href="{% url 'accounts:login' %}" class="waves-effect"><i class="material-icons">login</i>Sign In</a></li>
+        <li><a href="{% url 'accounts:register' %}" class="waves-effect"><i class="material-icons">person_add</i>Register</a></li>
+    {% endif %}
+</ul>
+
+<!-- Navbar -->
+<nav class="pngcs-nav">
+    <div class="nav-wrapper container">
+        <a href="{% url 'recruitment:job_list' %}" class="brand-logo">
+            <i class="material-icons" style="vertical-align: middle; color: var(--pngcs-gold); margin-right: 6px;">shield</i>
+            <span class="gold">PNGCS</span> Recruitment
+        </a>
+        <a href="#" data-target="side-nav" class="sidenav-trigger right">
+            <i class="material-icons">menu</i>
+        </a>
+        <ul class="right hide-on-med-and-down">
+            <li><a href="{% url 'recruitment:job_list' %}"><i class="material-icons left">work_outline</i>Vacancies</a></li>
+            {% if user.is_authenticated %}
+                {% if user.profile.role == 'applicant' %}
+                <li><a href="{% url 'recruitment:dashboard' %}"><i class="material-icons left">dashboard</i>My Apps</a></li>
+                {% endif %}
+                {% if user.profile.role == 'hr_admin' or user.is_superuser %}
+                <li><a href="{% url 'hr_admin:dashboard' %}"><i class="material-icons left">admin_panel_settings</i>HR Admin</a></li>
+                {% endif %}
+                {% if user.profile.role == 'panel_member' %}
+                <li><a href="{% url 'panel:dashboard' %}"><i class="material-icons left">assignment_turned_in</i>Panel</a></li>
+                {% endif %}
+                <li>
+                    <a class="dropdown-trigger" href="#!" data-target="user-drop">
+                        <i class="material-icons left">account_circle</i>{{ user.first_name|default:user.username }}<i class="material-icons right">arrow_drop_down</i>
+                    </a>
+                </li>
+                <ul id="user-drop" class="dropdown-content z-depth-3" style="min-width: 180px; border-radius: 6px;">
+                    <li><a href="{% url 'accounts:profile' %}" style="color: #424242;"><i class="material-icons">manage_accounts</i>My Profile</a></li>
+                    <li class="divider"></li>
+                    <li><a href="{% url 'accounts:logout' %}" style="color: #e53935;"><i class="material-icons">logout</i>Logout</a></li>
+                </ul>
+            {% else %}
+                <li><a href="{% url 'accounts:login' %}"><i class="material-icons left">login</i>Sign In</a></li>
+                <li><a href="{% url 'accounts:register' %}" class="btn white pngcs-flat waves-effect" style="margin: 12px 0 12px 8px; font-weight: 700;">Register</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+{% if messages %}
+<div class="container" style="margin-top: 12px;">
+    {% for message in messages %}
+    <div class="msg-flash {% if 'success' in message.tags %}success{% elif 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">
+        <i class="material-icons" style="font-size:1.2rem;">{% if 'success' in message.tags %}check_circle{% elif 'error' in message.tags %}error_outline{% elif 'warning' in message.tags %}warning_amber{% else %}info{% endif %}</i>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<footer class="page-footer">
+    <div class="container" style="padding-top: 32px;">
+        <div class="row">
+            <div class="col l4 s12">
+                <h6 class="white-text" style="font-weight: 700;">
+                    <i class="material-icons" style="vertical-align: middle; color: var(--pngcs-gold); font-size: 1rem; margin-right: 4px;">shield</i>PNGCS Recruitment
+                </h6>
+                <p class="grey-text text-lighten-2" style="font-size: 0.85rem;">Papua New Guinea Correctional Service — Online Recruitment Management System</p>
+            </div>
+            <div class="col l4 s12">
+                <h6 class="white-text" style="font-weight: 700;">Quick Links</h6>
+                <ul style="list-style:none; padding:0; margin:0;">
+                    <li><a href="{% url 'recruitment:job_list' %}" class="yellow-text text-accent-2" style="font-size:0.85rem;">Current Vacancies</a></li>
+                    <li><a href="{% url 'accounts:register' %}" class="yellow-text text-accent-2" style="font-size:0.85rem;">Create Account</a></li>
+                </ul>
+            </div>
+            <div class="col l4 s12">
+                <h6 class="white-text" style="font-weight: 700;">Contact</h6>
+                <p class="grey-text text-lighten-2" style="font-size: 0.85rem;">Waigani, Port Moresby, NCD<br>recruitment@pngcs.gov.pg</p>
+            </div>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container center-align grey-text text-lighten-2" style="font-size: 0.8rem; padding: 12px 0;">
+            &copy; 2026 Papua New Guinea Correctional Service. Powered by WMX Software.
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    M.Sidenav.init(document.querySelectorAll('.sidenav'));
+    M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), {coverTrigger: false, constrainWidth: false});
+    M.FormSelect.init(document.querySelectorAll('select'));
+    M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+    M.Modal.init(document.querySelectorAll('.modal'));
+    M.Collapsible.init(document.querySelectorAll('.collapsible'));
+    M.Tabs.init(document.querySelectorAll('.tabs'));
+    M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'));
+    M.Autocomplete.init(document.querySelectorAll('.autocomplete'));
+    document.querySelectorAll('input, textarea').forEach(function(el) {
+        if (el.value && el.value.trim().length > 0) {
+            const lbl = document.querySelector('label[for="' + el.id + '"]');
+            if (lbl) lbl.classList.add('active');
+        }
+    });
+});
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

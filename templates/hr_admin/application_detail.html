@@ -1,0 +1,462 @@
+{% extends 'hr_admin/base.html' %}
+{% load static %}
+
+{% block hr_content %}
+<!-- Header -->
+<div class="row" style="margin-bottom:16px;align-items:center;">
+  <div class="col s12 m8">
+    <h5 style="color:#003087;font-weight:700;margin:0;">
+      <i class="material-icons" style="vertical-align:middle;margin-right:8px;">person</i>
+      {{ application.full_name }}
+    </h5>
+    <p style="color:#666;margin:4px 0 0;">
+      Application for <strong>{{ application.vacancy.title }}</strong>
+      &bull; Ref: {{ application.vacancy.reference_number }}
+    </p>
+  </div>
+  <div class="col s12 m4" style="text-align:right;">
+    <a href="{% url 'hr_admin:application_list' %}" class="btn-flat" style="color:#003087;">
+      <i class="material-icons left">arrow_back</i>Back to Inbox
+    </a>
+  </div>
+</div>
+
+<div class="row">
+  <!-- LEFT COLUMN -->
+  <div class="col s12 m8">
+
+    <!-- Personal & Education Card -->
+    <div class="card" style="border-radius:8px;margin-bottom:16px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">person_outline</i> Personal & Education Details
+        </span>
+        <table style="font-size:13px;width:100%;">
+          <tbody>
+            <tr>
+              <td style="width:50%;padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Full Name</div>
+                  <div class="col s7" style="padding:0;">{{ application.full_name }}</div>
+                </div>
+              </td>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Date of Birth</div>
+                  <div class="col s7" style="padding:0;">{{ application.date_of_birth|date:"d M Y"|default:"—" }}</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Gender</div>
+                  <div class="col s7" style="padding:0;">{{ application.get_gender_display|default:"—" }}</div>
+                </div>
+              </td>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Province</div>
+                  <div class="col s7" style="padding:0;">{{ application.province }}</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Email</div>
+                  <div class="col s7" style="padding:0;">
+                    <a href="mailto:{{ application.email }}" style="color:#003087;">{{ application.email }}</a>
+                  </div>
+                </div>
+              </td>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Phone</div>
+                  <div class="col s7" style="padding:0;">{{ application.phone|default:"—" }}</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Qualification</div>
+                  <div class="col s7" style="padding:0;">
+                    <span class="chip" style="background:#e3eaf6;color:#003087;font-size:11px;">
+                      {{ application.get_qualification_display }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Institution</div>
+                  <div class="col s7" style="padding:0;">{{ application.institution|default:"—" }}</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Field of Study</div>
+                  <div class="col s7" style="padding:0;">{{ application.field_of_study|default:"—" }}</div>
+                </div>
+              </td>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Grad Year</div>
+                  <div class="col s7" style="padding:0;">{{ application.graduation_year|default:"—" }}</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;" colspan="2">
+                <div class="row" style="margin:0;">
+                  <div class="col s3" style="color:#888;font-weight:600;padding:0;">Experience</div>
+                  <div class="col s9" style="padding:0;">{{ application.years_experience|default:"0" }} year{{ application.years_experience|pluralize }}</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Work History + Cover Letter Collapsible -->
+    <ul class="collapsible" style="border-radius:8px;margin-bottom:16px;">
+      <li>
+        <div class="collapsible-header" style="font-weight:600;color:#003087;">
+          <i class="material-icons">business_center</i> Work History
+        </div>
+        <div class="collapsible-body" style="padding:16px;">
+          {% if application.work_history %}
+            <p style="white-space:pre-line;font-size:13px;">{{ application.work_history }}</p>
+          {% else %}
+            <p style="color:#aaa;font-style:italic;">No work history provided.</p>
+          {% endif %}
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header" style="font-weight:600;color:#003087;">
+          <i class="material-icons">edit_note</i> Cover Letter
+        </div>
+        <div class="collapsible-body" style="padding:16px;">
+          {% if application.cover_letter %}
+            <p style="white-space:pre-line;font-size:13px;line-height:1.7;">{{ application.cover_letter }}</p>
+          {% else %}
+            <p style="color:#aaa;font-style:italic;">No cover letter provided.</p>
+          {% endif %}
+        </div>
+      </li>
+    </ul>
+
+    <!-- AI Summary Box -->
+    <div style="background:linear-gradient(135deg,#e8f4fd,#f0e8ff);border-left:4px solid #003087;border-radius:8px;padding:16px 20px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <i class="material-icons" style="color:#003087;font-size:20px;">summarize</i>
+        <strong style="color:#003087;font-size:14px;">Application Summary &amp; OCR Analysis</strong>
+        <a href="{% url 'hr_admin:application_summary' application.pk %}"
+           class="btn-small waves-effect" style="background:#003087;margin-left:auto;font-size:11px;">
+          <i class="material-icons left" style="font-size:14px;">open_in_new</i>Full Summary
+        </a>
+        <form method="post" style="display:inline;margin:0;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="ocr_all">
+          <button type="submit" class="btn-small teal waves-effect" style="font-size:11px;">
+            <i class="material-icons left" style="font-size:14px;">document_scanner</i>OCR All Docs
+          </button>
+        </form>
+        <form method="post" style="display:inline;margin:0;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="regenerate_summary">
+          <button type="submit" class="btn-small blue waves-effect" style="font-size:11px;">
+            <i class="material-icons left" style="font-size:14px;">refresh</i>Refresh Summary
+          </button>
+        </form>
+      </div>
+      {% if application.ai_summary %}
+        <p style="font-size:12px;line-height:1.7;color:#333;margin:0;white-space:pre-wrap;font-family:monospace;background:#fff;padding:12px;border-radius:4px;max-height:260px;overflow-y:auto;">{{ application.ai_summary|truncatechars:1200 }}</p>
+        <a href="{% url 'hr_admin:application_summary' application.pk %}" style="font-size:12px;color:#003087;">Read full summary →</a>
+      {% else %}
+        <p style="font-size:13px;color:#888;margin:0;">No summary yet. Click <em>OCR All Docs</em> then <em>Refresh Summary</em>.</p>
+      {% endif %}
+    </div>
+
+    <!-- Documents Card -->
+    <div class="card" style="border-radius:8px;margin-bottom:16px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">attach_file</i> Supporting Documents
+        </span>
+        {% if documents %}
+          <ul class="collection" style="border:none;margin:0;">
+            {% for doc in documents %}
+              <li class="collection-item" style="padding:10px 0;">
+                <div style="display:flex;align-items:flex-start;gap:10px;justify-content:space-between;flex-wrap:wrap;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <i class="material-icons" style="color:#003087;">insert_drive_file</i>
+                    <div>
+                      <div style="font-weight:600;font-size:13px;">{{ doc.get_doc_type_display }}</div>
+                      <div style="font-size:11px;color:#888;">
+                        {{ doc.filename }} &bull; Uploaded {{ doc.uploaded_at|date:"d M Y" }}
+                        {% if doc.verified %}
+                          &bull; <span style="color:#2e7d32;"><i class="material-icons tiny">verified</i> Verified</span>
+                        {% else %}
+                          &bull; <span style="color:#e65100;">Unverified</span>
+                        {% endif %}
+                        {% if doc.ocr_text %}
+                          &bull; <span style="color:#00695c;"><i class="material-icons tiny">check_circle</i> OCR: {{ doc.ocr_text.split|length }} words</span>
+                        {% else %}
+                          &bull; <span style="color:#888;">No OCR text</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <a href="{% url 'hr_admin:document_ocr' doc.pk %}"
+                       class="btn-small tooltipped" data-position="top" data-tooltip="View OCR Text"
+                       style="background:#00695c;padding:0 10px;">
+                      <i class="material-icons" style="font-size:14px;">text_snippet</i>
+                    </a>
+                    <form method="post" style="display:inline;margin:0;">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="ocr_doc">
+                      <input type="hidden" name="doc_id" value="{{ doc.pk }}">
+                      <button type="submit" class="btn-small tooltipped teal" data-position="top" data-tooltip="Run OCR on this document" style="padding:0 10px;">
+                        <i class="material-icons" style="font-size:14px;">document_scanner</i>
+                      </button>
+                    </form>
+                    {% if not doc.verified %}
+                      <form method="post" style="display:inline;margin:0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="verify_doc">
+                        <input type="hidden" name="doc_id" value="{{ doc.pk }}">
+                        <button type="submit" class="btn-small tooltipped" data-position="top" data-tooltip="Mark Verified" style="background:#2e7d32;padding:0 10px;">
+                          <i class="material-icons" style="font-size:14px;">verified</i>
+                        </button>
+                      </form>
+                    {% endif %}
+                    <a href="{{ doc.file.url }}" target="_blank"
+                       class="btn-small tooltipped" data-position="top" data-tooltip="Download" style="background:#003087;padding:0 10px;">
+                      <i class="material-icons" style="font-size:14px;">download</i>
+                    </a>
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p style="color:#aaa;font-style:italic;text-align:center;padding:20px;">No documents uploaded.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Interviews Card -->
+    {% if interviews %}
+      <div class="card" style="border-radius:8px;margin-bottom:16px;">
+        <div class="card-content">
+          <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+            <i class="material-icons tiny">event</i> Interview Records
+          </span>
+          {% for interview in interviews %}
+            <div style="border:1px solid #e0e0e0;border-radius:6px;padding:14px;margin-bottom:12px;">
+              <div class="row" style="margin-bottom:8px;">
+                <div class="col s6">
+                  <span style="color:#888;font-size:12px;">Date &amp; Time</span>
+                  <div style="font-weight:600;font-size:13px;">{{ interview.scheduled_at|date:"d M Y" }} at {{ interview.scheduled_at|time:"H:i" }}</div>
+                </div>
+                <div class="col s6">
+                  <span style="color:#888;font-size:12px;">Venue</span>
+                  <div style="font-weight:600;font-size:13px;">{{ interview.venue|default:"TBA" }}</div>
+                </div>
+              </div>
+              {% if interview.panel_members.all %}
+                <div style="margin-bottom:8px;">
+                  <span style="color:#888;font-size:12px;">Panel Members</span>
+                  <div style="margin-top:4px;">
+                    {% for member in interview.panel_members.all %}
+                      <span class="chip" style="font-size:11px;background:#e3eaf6;color:#003087;">{{ member.get_full_name }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+              {% if interview.scores.all %}
+                <div style="margin-top:10px;">
+                  <span style="color:#888;font-size:12px;display:block;margin-bottom:6px;">Panel Scores</span>
+                  <table class="striped" style="font-size:12px;">
+                    <thead>
+                      <tr>
+                        <th>Panelist</th>
+                        <th>Communication</th>
+                        <th>Knowledge</th>
+                        <th>Attitude</th>
+                        <th>Experience</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for score in interview.scores.all %}
+                        <tr>
+                          <td>{{ score.panelist.get_full_name }}</td>
+                          <td>{{ score.communication }}/20</td>
+                          <td>{{ score.knowledge }}/30</td>
+                          <td>{{ score.attitude }}/25</td>
+                          <td>{{ score.experience }}/25</td>
+                          <td>
+                            <strong>
+                              {% if score.total >= 70 %}
+                                <span style="color:#2e7d32;">{{ score.total }}</span>
+                              {% elif score.total >= 50 %}
+                                <span style="color:#f57c00;">{{ score.total }}</span>
+                              {% else %}
+                                <span style="color:#c62828;">{{ score.total }}</span>
+                              {% endif %}
+                            </strong>/100
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+  </div><!-- /left col -->
+
+  <!-- RIGHT COLUMN -->
+  <div class="col s12 m4">
+
+    <!-- Score Card -->
+    <div class="card" style="border-radius:8px;margin-bottom:16px;">
+      <div class="card-content" style="text-align:center;">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;text-align:left;display:block;">
+          <i class="material-icons tiny">analytics</i> AI Score
+        </span>
+        {% if application.score is not None %}
+          <div class="score-display {% if application.score >= 70 %}hi{% elif application.score >= 50 %}md{% else %}lo{% endif %}"
+               style="font-size:4rem;font-weight:800;margin:16px 0 4px;
+               {% if application.score >= 70 %}color:#2e7d32;
+               {% elif application.score >= 50 %}color:#e65100;
+               {% else %}color:#c62828;{% endif %}">
+            {{ application.score }}
+          </div>
+          <div style="font-size:13px;color:#888;margin-bottom:16px;">out of 100</div>
+        {% else %}
+          <div style="font-size:3rem;color:#ccc;margin:16px 0 4px;">—</div>
+          <div style="font-size:13px;color:#bbb;margin-bottom:16px;">Not yet scored</div>
+        {% endif %}
+        <a href="{% url 'hr_admin:rescore_application' application.pk %}"
+           class="btn btn-block" style="background:#003087;width:100%;margin-bottom:8px;">
+          <i class="material-icons left">refresh</i>Re-score
+        </a>
+        <a href="{% url 'hr_admin:schedule_interview' application.pk %}"
+           class="btn btn-block" style="background:#2e7d32;width:100%;">
+          <i class="material-icons left">event</i>Schedule Interview
+        </a>
+      </div>
+    </div>
+
+    <!-- Update Status Card -->
+    <div class="card" style="border-radius:8px;margin-bottom:16px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">update</i> Update Status
+        </span>
+        <form method="post" action="{% url 'hr_admin:update_application_status' application.pk %}">
+          {% csrf_token %}
+          <div class="input-field">
+            <select id="status-select" name="status">
+              {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if application.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label for="status-select">Application Status</label>
+          </div>
+          <div class="input-field">
+            <textarea id="hr-notes" name="hr_notes"
+                      class="materialize-textarea"
+                      style="min-height:80px;">{{ application.hr_notes|default:'' }}</textarea>
+            <label for="hr-notes">HR Notes</label>
+          </div>
+          <button type="submit" class="btn" style="background:#003087;width:100%;">
+            <i class="material-icons left">send</i>Update &amp; Notify
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- References Card -->
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">contacts</i> References
+        </span>
+
+        {% if application.reference1_name %}
+          <div style="margin-bottom:16px;">
+            <div style="font-weight:700;font-size:13px;color:#003087;margin-bottom:6px;">
+              <i class="material-icons tiny">person</i> Reference 1
+            </div>
+            <table style="font-size:12px;width:100%;">
+              <tr><td style="color:#888;width:40%;">Name</td><td>{{ application.reference1_name }}</td></tr>
+              <tr><td style="color:#888;">Position</td><td>{{ application.reference1_position|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Organisation</td><td>{{ application.reference1_organisation|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Phone</td><td>{{ application.reference1_phone|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Email</td><td>
+                {% if application.reference1_email %}
+                  <a href="mailto:{{ application.reference1_email }}" style="color:#003087;">{{ application.reference1_email }}</a>
+                {% else %}—{% endif %}
+              </td></tr>
+            </table>
+          </div>
+        {% endif %}
+
+        {% if application.reference2_name %}
+          <div class="section-divider" style="border-top:1px solid #eee;margin:0 0 12px;"></div>
+          <div>
+            <div style="font-weight:700;font-size:13px;color:#003087;margin-bottom:6px;">
+              <i class="material-icons tiny">person</i> Reference 2
+            </div>
+            <table style="font-size:12px;width:100%;">
+              <tr><td style="color:#888;width:40%;">Name</td><td>{{ application.reference2_name }}</td></tr>
+              <tr><td style="color:#888;">Position</td><td>{{ application.reference2_position|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Organisation</td><td>{{ application.reference2_organisation|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Phone</td><td>{{ application.reference2_phone|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Email</td><td>
+                {% if application.reference2_email %}
+                  <a href="mailto:{{ application.reference2_email }}" style="color:#003087;">{{ application.reference2_email }}</a>
+                {% else %}—{% endif %}
+              </td></tr>
+            </table>
+          </div>
+        {% else %}
+          {% if not application.reference1_name %}
+            <p style="color:#aaa;font-style:italic;text-align:center;">No references provided.</p>
+          {% endif %}
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div><!-- /right col -->
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var collapsibles = document.querySelectorAll('.collapsible');
+    M.Collapsible.init(collapsibles);
+    var selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+    var tooltips = document.querySelectorAll('.tooltipped');
+    M.Tooltip.init(tooltips);
+    M.updateTextFields();
+  });
+</script>
+{% endblock %}

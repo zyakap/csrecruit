@@ -1,0 +1,217 @@
+{% extends 'hr_admin/base.html' %}
+{% load static %}
+
+{% block hr_content %}
+<!-- Header -->
+<div class="row" style="margin-bottom:8px;align-items:center;">
+  <div class="col s12 m8">
+    <h5 style="color:#003087;font-weight:700;margin:0;">
+      <i class="material-icons" style="vertical-align:middle;margin-right:8px;">work</i>
+      Vacancies
+    </h5>
+    <p style="color:#666;margin:4px 0 0;">Manage all civil service vacancy listings</p>
+  </div>
+  <div class="col s12 m4" style="text-align:right;">
+    <a href="{% url 'hr_admin:vacancy_create' %}" class="btn" style="background:#003087;">
+      <i class="material-icons left">add</i>Create Vacancy
+    </a>
+  </div>
+</div>
+
+<!-- Status Filter Form -->
+<div class="card" style="border-radius:8px;margin-bottom:16px;">
+  <div class="card-content" style="padding:16px 20px;">
+    <form method="get" action="">
+      <div class="row" style="margin-bottom:0;">
+        <div class="col s12 m4">
+          <div class="input-field" style="margin-top:0;">
+            <select name="status" id="status-filter">
+              <option value="">All Statuses</option>
+              {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label for="status-filter">Filter by Status</label>
+          </div>
+        </div>
+        <div class="col s12 m4">
+          <div class="input-field" style="margin-top:0;">
+            <select name="province" id="province-filter">
+              <option value="">All Provinces</option>
+              {% for value, label in province_choices %}
+                <option value="{{ value }}" {% if request.GET.province == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label for="province-filter">Filter by Province</label>
+          </div>
+        </div>
+        <div class="col s12 m4" style="display:flex;align-items:center;gap:8px;padding-top:8px;">
+          <button type="submit" class="btn" style="background:#003087;">
+            <i class="material-icons left">filter_list</i>Filter
+          </button>
+          <a href="{% url 'hr_admin:vacancy_list' %}" class="btn-flat" style="color:#003087;">
+            <i class="material-icons left">clear</i>Clear
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Vacancies Table -->
+<div class="card" style="border-radius:8px;">
+  <div class="card-content" style="padding:0;">
+    {% if vacancies %}
+      <div class="responsive-table">
+        <table class="striped hoverable" style="font-size:13px;">
+          <thead style="background:#003087;">
+            <tr>
+              <th style="color:#fff;">Ref No.</th>
+              <th style="color:#fff;">Title / Department</th>
+              <th style="color:#fff;">Province</th>
+              <th style="color:#fff;">Qualification</th>
+              <th style="color:#fff;">Close Date</th>
+              <th style="color:#fff;text-align:center;">Apps</th>
+              <th style="color:#fff;">Status</th>
+              <th style="color:#fff;text-align:center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for vacancy in vacancies %}
+              <tr>
+                <td style="font-family:monospace;color:#003087;font-weight:600;white-space:nowrap;">
+                  {{ vacancy.reference_number }}
+                </td>
+                <td>
+                  <div style="font-weight:600;color:#222;">{{ vacancy.title }}</div>
+                  <div style="font-size:11px;color:#888;">{{ vacancy.department }}</div>
+                </td>
+                <td style="white-space:nowrap;">{{ vacancy.province }}</td>
+                <td>
+                  <span class="chip" style="background:#e3eaf6;color:#003087;font-size:11px;">
+                    {{ vacancy.get_qualification_display }}
+                  </span>
+                </td>
+                <td style="white-space:nowrap;">
+                  {% if vacancy.is_expired %}
+                    <span style="color:#c62828;">{{ vacancy.close_date }}</span>
+                  {% else %}
+                    {{ vacancy.close_date }}
+                  {% endif %}
+                </td>
+                <td style="text-align:center;">
+                  <span class="badge new" style="background:#003087;">{{ vacancy.application_count|default:"0" }}</span>
+                </td>
+                <td>
+                  <span class="chip s-{{ vacancy.status }}" style="font-size:11px;">
+                    {{ vacancy.get_status_display }}
+                  </span>
+                </td>
+                <td style="white-space:nowrap;">
+                  <!-- Edit -->
+                  <a href="{% url 'hr_admin:vacancy_edit' vacancy.pk %}"
+                     class="btn-small tooltipped" data-position="top" data-tooltip="Edit"
+                     style="background:#1565c0;padding:0 8px;margin:1px;">
+                    <i class="material-icons" style="font-size:14px;">edit</i>
+                  </a>
+                  <!-- Toggle Active/Paused -->
+                  <a href="{% url 'hr_admin:vacancy_toggle' vacancy.pk %}"
+                     class="btn-small tooltipped" data-position="top" data-tooltip="Toggle Active/Paused"
+                     style="background:#e65100;padding:0 8px;margin:1px;">
+                    {% if vacancy.status == 'open' %}
+                      <i class="material-icons" style="font-size:14px;">pause</i>
+                    {% else %}
+                      <i class="material-icons" style="font-size:14px;">play_arrow</i>
+                    {% endif %}
+                  </a>
+                  <!-- AI Screening -->
+                  <a href="{% url 'hr_admin:ai_screen' vacancy.pk %}"
+                     class="btn-small tooltipped" data-position="top" data-tooltip="AI Screening"
+                     style="background:#6a1b9a;padding:0 8px;margin:1px;">
+                    <i class="material-icons" style="font-size:14px;">smart_toy</i>
+                  </a>
+                  <!-- Shortlist -->
+                  <a href="{% url 'hr_admin:shortlist' vacancy.pk %}"
+                     class="btn-small tooltipped" data-position="top" data-tooltip="Shortlist Applicants"
+                     style="background:#f9a825;padding:0 8px;margin:1px;">
+                    <i class="material-icons" style="font-size:14px;">star</i>
+                  </a>
+                  <!-- Export -->
+                  <a href="{% url 'hr_admin:export_applications' vacancy.pk %}"
+                     class="btn-small tooltipped" data-position="top" data-tooltip="Export Applications"
+                     style="background:#2e7d32;padding:0 8px;margin:1px;">
+                    <i class="material-icons" style="font-size:14px;">download</i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state" style="padding:60px;text-align:center;color:#aaa;">
+        <i class="material-icons" style="font-size:60px;color:#ddd;">work_off</i>
+        <h6 style="color:#bbb;margin:12px 0 8px;">No vacancies found</h6>
+        <p style="font-size:13px;">
+          {% if request.GET.status or request.GET.province %}
+            No vacancies match the selected filters.
+            <a href="{% url 'hr_admin:vacancy_list' %}" style="color:#003087;">Clear filters</a>
+          {% else %}
+            Get started by creating your first vacancy.
+          {% endif %}
+        </p>
+        <a href="{% url 'hr_admin:vacancy_create' %}" class="btn" style="background:#003087;margin-top:8px;">
+          <i class="material-icons left">add</i>Create Vacancy
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if vacancies.has_other_pages %}
+  <div style="text-align:center;margin-top:16px;">
+    <ul class="pagination">
+      {% if vacancies.has_previous %}
+        <li class="waves-effect">
+          <a href="?page={{ vacancies.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.province %}&province={{ request.GET.province }}{% endif %}">
+            <i class="material-icons">chevron_left</i>
+          </a>
+        </li>
+      {% else %}
+        <li class="disabled"><a><i class="material-icons">chevron_left</i></a></li>
+      {% endif %}
+      {% for num in vacancies.paginator.page_range %}
+        {% if vacancies.number == num %}
+          <li class="active" style="background:#003087;"><a>{{ num }}</a></li>
+        {% else %}
+          <li class="waves-effect">
+            <a href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.province %}&province={{ request.GET.province }}{% endif %}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+      {% if vacancies.has_next %}
+        <li class="waves-effect">
+          <a href="?page={{ vacancies.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.province %}&province={{ request.GET.province }}{% endif %}">
+            <i class="material-icons">chevron_right</i>
+          </a>
+        </li>
+      {% else %}
+        <li class="disabled"><a><i class="material-icons">chevron_right</i></a></li>
+      {% endif %}
+    </ul>
+  </div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var tooltipped = document.querySelectorAll('.tooltipped');
+    M.Tooltip.init(tooltipped);
+    var selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+  });
+</script>
+{% endblock %}
