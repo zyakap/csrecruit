@@ -1,84 +1,87 @@
 {% extends 'base.html' %}
-{% block title %}Register - PNGCS Recruitment Portal{% endblock %}
+{% block title %}Register — PNGCS Recruitment{% endblock %}
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card">
-                <div class="card-header bg-pngcs text-center py-4">
-                    <i class="bi bi-person-plus-fill" style="font-size: 2rem; color: #FFD700;"></i>
-                    <h4 class="mt-2 mb-0 text-white">Create Applicant Account</h4>
-                    <p class="text-white-50 small mb-0">Register to apply for PNGCS positions</p>
-                </div>
-                <div class="card-body p-4">
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">First Name *</label>
-                                <input type="text" name="first_name" class="form-control" required
-                                       value="{{ form.first_name.value|default:'' }}">
-                                {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors.0 }}</div>{% endif %}
+<div style="background: linear-gradient(135deg, #003087 0%, #1a4db3 100%); min-height: 92vh; padding: 40px 0;">
+    <div class="container">
+        <div class="row" style="margin:0;">
+            <div class="col s12 m10 l6 offset-m1 offset-l3">
+                <div class="card z-depth-4" style="border-radius:12px; overflow:hidden;">
+                    <div style="background:#003087; padding:28px 24px; text-align:center;">
+                        <i class="material-icons" style="font-size:2.6rem; color:#FFD700;">person_add</i>
+                        <h5 style="color:#fff; font-weight:700; margin:8px 0 4px;">Create Applicant Account</h5>
+                        <p style="color:rgba(255,255,255,0.65); font-size:0.85rem; margin:0;">Register to apply for PNGCS positions</p>
+                    </div>
+                    <div class="card-content" style="padding:24px 28px 20px;">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row" style="margin-bottom:0;">
+                                <div class="input-field col s12 m6">
+                                    <i class="material-icons prefix" style="color:#003087;">badge</i>
+                                    <input id="fn" type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" required>
+                                    <label for="fn">First Name *</label>
+                                    {% if form.first_name.errors %}<span class="helper-text red-text">{{ form.first_name.errors.0 }}</span>{% endif %}
+                                </div>
+                                <div class="input-field col s12 m6">
+                                    <input id="ln" type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" required>
+                                    <label for="ln">Last Name *</label>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Last Name *</label>
-                                <input type="text" name="last_name" class="form-control" required
-                                       value="{{ form.last_name.value|default:'' }}">
+                            <div class="input-field">
+                                <i class="material-icons prefix" style="color:#003087;">alternate_email</i>
+                                <input id="uname" type="text" name="username" value="{{ form.username.value|default:'' }}" required>
+                                <label for="uname">Username *</label>
+                                {% if form.username.errors %}<span class="helper-text red-text">{{ form.username.errors.0 }}</span>{% endif %}
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Username *</label>
-                            <input type="text" name="username" class="form-control" required
-                                   value="{{ form.username.value|default:'' }}">
-                            {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Email Address *</label>
-                            <input type="email" name="email" class="form-control" required
-                                   value="{{ form.email.value|default:'' }}">
-                            {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Province</label>
-                                <select name="province" class="form-select">
+                            <div class="input-field">
+                                <i class="material-icons prefix" style="color:#003087;">email</i>
+                                <input id="email" type="email" name="email" value="{{ form.email.value|default:'' }}" required>
+                                <label for="email">Email Address *</label>
+                                {% if form.email.errors %}<span class="helper-text red-text">{{ form.email.errors.0 }}</span>{% endif %}
+                            </div>
+                            <div class="row" style="margin-bottom:0;">
+                                <div class="input-field col s12 m6">
+                                    <i class="material-icons prefix" style="color:#003087;">phone</i>
+                                    <input id="phone" type="text" name="phone" placeholder="+675 XXXX XXXX">
+                                    <label for="phone" class="active">Phone</label>
+                                </div>
+                                <div class="input-field col s12 m6">
+                                    <select name="gender">
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <label>Gender</label>
+                                </div>
+                            </div>
+                            <div class="input-field">
+                                <select name="province">
                                     <option value="">Select Province</option>
-                                    {% for val, label in form.province.field.choices %}
-                                        {% if val %}<option value="{{ val }}">{{ label }}</option>{% endif %}
-                                    {% endfor %}
+                                    {% for val, label in form.province.field.choices %}{% if val %}<option value="{{ val }}">{{ label }}</option>{% endif %}{% endfor %}
                                 </select>
+                                <label>Province</label>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Gender</label>
-                                <select name="gender" class="form-select">
-                                    <option value="">Select Gender</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
-                                </select>
+                            <div class="row" style="margin-bottom:0;">
+                                <div class="input-field col s12 m6">
+                                    <i class="material-icons prefix" style="color:#003087;">lock_outline</i>
+                                    <input id="pw1" type="password" name="password" required>
+                                    <label for="pw1">Password *</label>
+                                </div>
+                                <div class="input-field col s12 m6">
+                                    <i class="material-icons prefix" style="color:#003087;">lock</i>
+                                    <input id="pw2" type="password" name="confirm_password" required>
+                                    <label for="pw2">Confirm Password *</label>
+                                    {% if form.confirm_password.errors %}<span class="helper-text red-text">{{ form.confirm_password.errors.0 }}</span>{% endif %}
+                                </div>
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Phone Number</label>
-                            <input type="text" name="phone" class="form-control" placeholder="+675 XXXX XXXX">
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Password *</label>
-                                <input type="password" name="password" class="form-control" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Confirm Password *</label>
-                                <input type="password" name="confirm_password" class="form-control" required>
-                                {% if form.confirm_password.errors %}<div class="text-danger small">{{ form.confirm_password.errors.0 }}</div>{% endif %}
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-pngcs w-100 py-2 fw-bold mt-2">
-                            <i class="bi bi-person-check me-2"></i>Create Account
-                        </button>
-                    </form>
-                    <hr>
-                    <p class="text-center mb-0">Already have an account? <a href="{% url 'accounts:login' %}" class="fw-semibold">Sign in</a></p>
+                            <button type="submit" class="btn waves-effect waves-light btn-large" style="width:100%; margin-top:8px; background:#003087; font-weight:700; border-radius:4px;">
+                                <i class="material-icons left">how_to_reg</i>Create Account
+                            </button>
+                        </form>
+                        <p class="center-align grey-text" style="margin-top:16px; font-size:0.88rem;">
+                            Already have an account? <a href="{% url 'accounts:login' %}" style="color:#003087; font-weight:600;">Sign in</a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

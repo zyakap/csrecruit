@@ -1,66 +1,70 @@
 {% extends 'base.html' %}
-{% block title %}My Profile - PNGCS{% endblock %}
+{% block title %}My Profile — PNGCS{% endblock %}
 {% block content %}
-<div class="container py-4">
+<div class="container" style="margin-top: 32px; margin-bottom: 48px;">
     <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card">
-                <div class="card-header bg-pngcs">
-                    <h5 class="mb-0 text-white"><i class="bi bi-person-circle me-2"></i>My Profile</h5>
+        <div class="col s12 m10 l7 offset-m1 offset-l2">
+            <div class="card z-depth-2">
+                <div class="card-header">
+                    <h5><i class="material-icons" style="vertical-align:middle; margin-right:8px;">manage_accounts</i>My Profile</h5>
                 </div>
-                <div class="card-body p-4">
+                <div class="card-content" style="padding:28px;">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">First Name</label>
-                                <input type="text" name="first_name" class="form-control" value="{{ form.first_name.value|default:'' }}" required>
+                        <div class="row" style="margin-bottom:0;">
+                            <div class="input-field col s12 m6">
+                                <input id="fn" type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" required>
+                                <label for="fn" {% if form.first_name.value %}class="active"{% endif %}>First Name</label>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Last Name</label>
-                                <input type="text" name="last_name" class="form-control" value="{{ form.last_name.value|default:'' }}" required>
+                            <div class="input-field col s12 m6">
+                                <input id="ln" type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" required>
+                                <label for="ln" {% if form.last_name.value %}class="active"{% endif %}>Last Name</label>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Email</label>
-                            <input type="email" name="email" class="form-control" value="{{ form.email.value|default:'' }}" required>
+                        <div class="input-field">
+                            <input id="em" type="email" name="email" value="{{ form.email.value|default:'' }}" required>
+                            <label for="em" {% if form.email.value %}class="active"{% endif %}>Email</label>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Phone</label>
-                                <input type="text" name="phone" class="form-control" value="{{ form.phone.value|default:'' }}">
+                        <div class="row" style="margin-bottom:0;">
+                            <div class="input-field col s12 m6">
+                                <input id="ph" type="text" name="phone" value="{{ form.phone.value|default:'' }}">
+                                <label for="ph" {% if form.phone.value %}class="active"{% endif %}>Phone</label>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Province</label>
-                                <select name="province" class="form-select">
+                            <div class="input-field col s12 m6">
+                                <input id="dob" type="date" name="date_of_birth" value="{{ form.date_of_birth.value|date:'Y-m-d'|default:'' }}">
+                                <label for="dob" class="active">Date of Birth</label>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom:0;">
+                            <div class="input-field col s12 m6">
+                                <select name="province">
                                     <option value="">Select Province</option>
                                     {% for val, label in form.province.field.choices %}
-                                        <option value="{{ val }}" {% if form.province.value == val %}selected{% endif %}>{{ label }}</option>
+                                        {% if val %}<option value="{{ val }}" {% if form.province.value == val %}selected{% endif %}>{{ label }}</option>{% endif %}
                                     {% endfor %}
                                 </select>
+                                <label>Province</label>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Date of Birth</label>
-                                <input type="date" name="date_of_birth" class="form-control" value="{{ form.date_of_birth.value|date:'Y-m-d'|default:'' }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Gender</label>
-                                <select name="gender" class="form-select">
-                                    <option value="">Select</option>
+                            <div class="input-field col s12 m6">
+                                <select name="gender">
+                                    <option value="">Select Gender</option>
                                     <option value="Male" {% if form.gender.value == 'Male' %}selected{% endif %}>Male</option>
                                     <option value="Female" {% if form.gender.value == 'Female' %}selected{% endif %}>Female</option>
                                     <option value="Other" {% if form.gender.value == 'Other' %}selected{% endif %}>Other</option>
                                 </select>
+                                <label>Gender</label>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Address</label>
-                            <textarea name="address" class="form-control" rows="2">{{ form.address.value|default:'' }}</textarea>
+                        <div class="input-field">
+                            <textarea id="addr" name="address" class="materialize-textarea">{{ form.address.value|default:'' }}</textarea>
+                            <label for="addr" {% if form.address.value %}class="active"{% endif %}>Address</label>
                         </div>
-                        <button type="submit" class="btn btn-pngcs"><i class="bi bi-save me-2"></i>Save Changes</button>
-                        <a href="{% url 'recruitment:dashboard' %}" class="btn btn-outline-secondary ms-2">Back to Dashboard</a>
+                        <div style="display:flex; gap:12px; margin-top:8px;">
+                            <button type="submit" class="btn waves-effect waves-light" style="background:#003087; font-weight:600;">
+                                <i class="material-icons left">save</i>Save Changes
+                            </button>
+                            <a href="{% url 'recruitment:dashboard' %}" class="btn btn-flat waves-effect" style="color:#616161;">Cancel</a>
+                        </div>
                     </form>
                 </div>
             </div>
