@@ -1,90 +1,266 @@
 {% extends 'hr_admin/base.html' %}
-{% block title %}{{ title }} - PNGCS HR{% endblock %}
+{% load static %}
+
 {% block hr_content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0"><i class="bi bi-briefcase me-2"></i>{{ title }}</h4>
-    <a href="{% url 'hr_admin:vacancy_list' %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-2"></i>Back to Vacancies
+<!-- Header -->
+<div class="row" style="margin-bottom:16px;align-items:center;">
+  <div class="col s12 m8">
+    <h5 style="color:#003087;font-weight:700;margin:0;">
+      <i class="material-icons" style="vertical-align:middle;margin-right:8px;">{{ form_icon|default:'add_circle' }}</i>
+      {% if object %}Edit Vacancy{% else %}Create New Vacancy{% endif %}
+    </h5>
+    <p style="color:#666;margin:4px 0 0;">
+      {% if object %}Update vacancy details for {{ object.title }}{% else %}Fill in the details to post a new vacancy{% endif %}
+    </p>
+  </div>
+  <div class="col s12 m4" style="text-align:right;">
+    <a href="{% url 'hr_admin:vacancy_list' %}" class="btn-flat" style="color:#003087;">
+      <i class="material-icons left">arrow_back</i>Back to Vacancies
     </a>
+  </div>
 </div>
-<div class="card">
-    <div class="card-body p-4">
-        <form method="post">
-            {% csrf_token %}
-            <div class="row">
-                <div class="col-md-8 mb-3">
-                    <label class="form-label fw-semibold">Position Title *</label>
-                    {{ form.title }}
-                    {% if form.title.errors %}<div class="text-danger small">{{ form.title.errors.0 }}</div>{% endif %}
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label fw-semibold">Reference Number *</label>
-                    {{ form.reference_number }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Department *</label>
-                    {{ form.department }}
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label class="form-label fw-semibold">Category *</label>
-                    {{ form.category }}
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label class="form-label fw-semibold">Province *</label>
-                    {{ form.province }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-3 mb-3">
-                    <label class="form-label fw-semibold">Min. Qualification *</label>
-                    {{ form.qualification_level }}
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label class="form-label fw-semibold">Positions Available *</label>
-                    {{ form.positions_available }}
-                </div>
-                <div class="col-md-2 mb-3">
-                    <label class="form-label fw-semibold">Min Age</label>
-                    {{ form.min_age }}
-                </div>
-                <div class="col-md-2 mb-3">
-                    <label class="form-label fw-semibold">Max Age</label>
-                    {{ form.max_age }}
-                </div>
-                <div class="col-md-2 mb-3">
-                    <label class="form-label fw-semibold">Status</label>
-                    {{ form.status }}
-                </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Salary Range</label>
-                {{ form.salary_range }}
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Position Description *</label>
-                {{ form.description }}
-            </div>
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Requirements & Qualifications *</label>
-                {{ form.requirements }}
-            </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Open Date *</label>
-                    {{ form.open_date }}
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Close Date *</label>
-                    {{ form.close_date }}
-                </div>
-            </div>
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-pngcs"><i class="bi bi-save me-2"></i>Save Vacancy</button>
-                <a href="{% url 'hr_admin:vacancy_list' %}" class="btn btn-outline-secondary">Cancel</a>
-            </div>
-        </form>
-    </div>
+
+<!-- Form Card -->
+<div class="card" style="border-radius:8px;">
+  <div class="card-content">
+    <form method="post" action="">
+      {% csrf_token %}
+
+      <!-- Row 1: Title + Reference Number -->
+      <div class="row">
+        <div class="col s12 m8">
+          <div class="input-field">
+            <input type="text" id="id_title" name="title"
+                   value="{{ form.title.value|default:'' }}"
+                   class="{% if form.title.errors %}invalid{% endif %}" required>
+            <label for="id_title">Vacancy Title *</label>
+            {% if form.title.errors %}
+              <span class="helper-text red-text">{{ form.title.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col s12 m4">
+          <div class="input-field">
+            <input type="text" id="id_reference_number" name="reference_number"
+                   value="{{ form.reference_number.value|default:'' }}"
+                   class="{% if form.reference_number.errors %}invalid{% endif %}">
+            <label for="id_reference_number">Reference Number</label>
+            {% if form.reference_number.errors %}
+              <span class="helper-text red-text">{{ form.reference_number.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: Department + Category + Province -->
+      <div class="row">
+        <div class="col s12 m4">
+          <div class="input-field">
+            <input type="text" id="id_department" name="department"
+                   value="{{ form.department.value|default:'' }}"
+                   class="{% if form.department.errors %}invalid{% endif %}" required>
+            <label for="id_department">Department *</label>
+            {% if form.department.errors %}
+              <span class="helper-text red-text">{{ form.department.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col s12 m4">
+          <div class="input-field">
+            <select id="id_category" name="category">
+              <option value="">Select Category</option>
+              {% for value, label in form.fields.category.choices %}
+                <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label for="id_category">Category</label>
+            {% if form.category.errors %}
+              <span class="helper-text red-text">{{ form.category.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col s12 m4">
+          <div class="input-field">
+            <select id="id_province" name="province">
+              <option value="">Select Province</option>
+              {% for value, label in form.fields.province.choices %}
+                <option value="{{ value }}" {% if form.province.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label for="id_province">Province *</label>
+            {% if form.province.errors %}
+              <span class="helper-text red-text">{{ form.province.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Qualification + Positions + Min Age + Max Age + Status -->
+      <div class="row">
+        <div class="col s12 m3">
+          <div class="input-field">
+            <select id="id_qualification" name="qualification">
+              <option value="">Select Qualification</option>
+              {% for value, label in form.fields.qualification.choices %}
+                <option value="{{ value }}" {% if form.qualification.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label for="id_qualification">Min. Qualification *</label>
+            {% if form.qualification.errors %}
+              <span class="helper-text red-text">{{ form.qualification.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col s12 m2">
+          <div class="input-field">
+            <input type="number" id="id_positions" name="positions"
+                   value="{{ form.positions.value|default:'1' }}" min="1"
+                   class="{% if form.positions.errors %}invalid{% endif %}">
+            <label for="id_positions">Positions</label>
+            {% if form.positions.errors %}
+              <span class="helper-text red-text">{{ form.positions.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col s12 m2">
+          <div class="input-field">
+            <input type="number" id="id_min_age" name="min_age"
+                   value="{{ form.min_age.value|default:'' }}" min="18"
+                   class="{% if form.min_age.errors %}invalid{% endif %}">
+            <label for="id_min_age">Min Age</label>
+            {% if form.min_age.errors %}
+              <span class="helper-text red-text">{{ form.min_age.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col s12 m2">
+          <div class="input-field">
+            <input type="number" id="id_max_age" name="max_age"
+                   value="{{ form.max_age.value|default:'' }}" min="18"
+                   class="{% if form.max_age.errors %}invalid{% endif %}">
+            <label for="id_max_age">Max Age</label>
+            {% if form.max_age.errors %}
+              <span class="helper-text red-text">{{ form.max_age.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col s12 m3">
+          <div class="input-field">
+            <select id="id_status" name="status">
+              {% for value, label in form.fields.status.choices %}
+                <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label for="id_status">Status *</label>
+            {% if form.status.errors %}
+              <span class="helper-text red-text">{{ form.status.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Salary -->
+      <div class="row">
+        <div class="col s12 m6">
+          <div class="input-field">
+            <input type="text" id="id_salary" name="salary"
+                   value="{{ form.salary.value|default:'' }}"
+                   class="{% if form.salary.errors %}invalid{% endif %}"
+                   placeholder="e.g. PGK 45,000 – 55,000 per annum">
+            <label for="id_salary">Salary Range</label>
+            {% if form.salary.errors %}
+              <span class="helper-text red-text">{{ form.salary.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="row">
+        <div class="col s12">
+          <div class="input-field">
+            <textarea id="id_description" name="description"
+                      class="materialize-textarea {% if form.description.errors %}invalid{% endif %}"
+                      style="min-height:120px;">{{ form.description.value|default:'' }}</textarea>
+            <label for="id_description">Position Description *</label>
+            {% if form.description.errors %}
+              <span class="helper-text red-text">{{ form.description.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Requirements -->
+      <div class="row">
+        <div class="col s12">
+          <div class="input-field">
+            <textarea id="id_requirements" name="requirements"
+                      class="materialize-textarea {% if form.requirements.errors %}invalid{% endif %}"
+                      style="min-height:120px;">{{ form.requirements.value|default:'' }}</textarea>
+            <label for="id_requirements">Selection Criteria / Requirements</label>
+            {% if form.requirements.errors %}
+              <span class="helper-text red-text">{{ form.requirements.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Row: Open Date + Close Date -->
+      <div class="row">
+        <div class="col s12 m6">
+          <div class="input-field">
+            <input type="date" id="id_open_date" name="open_date"
+                   value="{{ form.open_date.value|default:'' }}"
+                   class="{% if form.open_date.errors %}invalid{% endif %}">
+            <label for="id_open_date">Opening Date *</label>
+            {% if form.open_date.errors %}
+              <span class="helper-text red-text">{{ form.open_date.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col s12 m6">
+          <div class="input-field">
+            <input type="date" id="id_close_date" name="close_date"
+                   value="{{ form.close_date.value|default:'' }}"
+                   class="{% if form.close_date.errors %}invalid{% endif %}">
+            <label for="id_close_date">Closing Date *</label>
+            {% if form.close_date.errors %}
+              <span class="helper-text red-text">{{ form.close_date.errors|join:", " }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider" style="border-top:1px solid #e0e0e0;margin:8px 0 20px;"></div>
+
+      <!-- Action Buttons -->
+      <div class="row" style="margin-bottom:0;">
+        <div class="col s12">
+          <button type="submit" class="btn" style="background:#003087;margin-right:12px;">
+            <i class="material-icons left">save</i>
+            {% if object %}Save Changes{% else %}Post Vacancy{% endif %}
+          </button>
+          <a href="{% url 'hr_admin:vacancy_list' %}" class="btn-flat" style="color:#666;">
+            <i class="material-icons left">cancel</i>Cancel
+          </a>
+        </div>
+      </div>
+
+    </form>
+  </div>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+    var textareas = document.querySelectorAll('.materialize-textarea');
+    M.textareaAutoResize(textareas[0]);
+    // Re-init labels for pre-filled fields
+    M.updateTextFields();
+  });
+</script>
 {% endblock %}

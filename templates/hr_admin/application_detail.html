@@ -1,188 +1,419 @@
 {% extends 'hr_admin/base.html' %}
-{% block title %}Application #{{ application.pk }} - HR Admin{% endblock %}
+{% load static %}
+
 {% block hr_content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="fw-bold mb-0"><i class="bi bi-person-lines-fill me-2"></i>{{ application.full_name }}</h4>
-    <a href="{% url 'hr_admin:application_list' %}" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left me-1"></i>Back
+<!-- Header -->
+<div class="row" style="margin-bottom:16px;align-items:center;">
+  <div class="col s12 m8">
+    <h5 style="color:#003087;font-weight:700;margin:0;">
+      <i class="material-icons" style="vertical-align:middle;margin-right:8px;">person</i>
+      {{ application.full_name }}
+    </h5>
+    <p style="color:#666;margin:4px 0 0;">
+      Application for <strong>{{ application.vacancy.title }}</strong>
+      &bull; Ref: {{ application.vacancy.reference_number }}
+    </p>
+  </div>
+  <div class="col s12 m4" style="text-align:right;">
+    <a href="{% url 'hr_admin:application_list' %}" class="btn-flat" style="color:#003087;">
+      <i class="material-icons left">arrow_back</i>Back to Inbox
     </a>
+  </div>
 </div>
 
-<div class="row g-3">
-    <div class="col-md-8">
-        <!-- Application Info -->
-        <div class="card mb-3">
-            <div class="card-header bg-pngcs text-white">
-                Application #{{ application.pk }} — {{ application.vacancy.title }}
-                <small class="ms-2 opacity-75">Ref: {{ application.vacancy.reference_number }}</small>
-            </div>
-            <div class="card-body">
-                <div class="row small">
-                    <div class="col-md-6">
-                        <h6 class="fw-bold text-muted text-uppercase small">Personal</h6>
-                        <p class="mb-1"><strong>Name:</strong> {{ application.full_name }}</p>
-                        <p class="mb-1"><strong>DOB:</strong> {{ application.date_of_birth|date:"d M Y" }} (Age {{ application.get_age }})</p>
-                        <p class="mb-1"><strong>Gender:</strong> {{ application.gender }}</p>
-                        <p class="mb-1"><strong>Province:</strong> {{ application.province }}</p>
-                        <p class="mb-1"><strong>Phone:</strong> {{ application.phone }}</p>
-                        <p class="mb-1"><strong>Email:</strong> {{ application.email }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="fw-bold text-muted text-uppercase small">Education</h6>
-                        <p class="mb-1"><strong>Qualification:</strong> {{ application.get_highest_qualification_display }}</p>
-                        <p class="mb-1"><strong>Institution:</strong> {{ application.institution }}</p>
-                        <p class="mb-1"><strong>Year:</strong> {{ application.year_completed }}</p>
-                        <p class="mb-1"><strong>Grade/Result:</strong> {{ application.grade_result }}</p>
-                        <p class="mb-1"><strong>Experience:</strong> {{ application.years_experience }} year(s)</p>
-                        {% if application.current_employer %}
-                        <p class="mb-1"><strong>Current:</strong> {{ application.current_position }} @ {{ application.current_employer }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-                {% if application.work_history %}
-                <h6 class="fw-bold text-muted text-uppercase small mt-3">Work History</h6>
-                <p class="small">{{ application.work_history }}</p>
-                {% endif %}
-                {% if application.cover_letter %}
-                <h6 class="fw-bold text-muted text-uppercase small mt-3">Cover Letter</h6>
-                <p class="small bg-light p-2 rounded">{{ application.cover_letter }}</p>
-                {% endif %}
-                {% if application.ai_summary %}
-                <div class="alert alert-info mt-3 small">
-                    <i class="bi bi-robot me-2"></i><strong>AI Summary:</strong> {{ application.ai_summary }}
-                </div>
-                {% endif %}
-            </div>
-        </div>
+<div class="row">
+  <!-- LEFT COLUMN -->
+  <div class="col s12 m8">
 
-        <!-- Documents -->
-        <div class="card mb-3">
-            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold"><i class="bi bi-paperclip me-2"></i>Documents</h6></div>
-            <div class="card-body p-0">
-                {% for doc in documents %}
-                <div class="border-bottom px-3 py-2 d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="bi bi-file-earmark me-2"></i>
-                        <strong class="small">{{ doc.get_doc_type_display }}</strong>
-                        <small class="text-muted ms-2">{{ doc.filename }}</small>
-                    </div>
-                    <div class="d-flex gap-2 align-items-center">
-                        {% if doc.verified %}
-                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Verified</span>
-                        {% else %}
-                            <form method="post" class="d-inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="verify_doc">
-                                <input type="hidden" name="doc_id" value="{{ doc.pk }}">
-                                <button type="submit" class="btn btn-outline-success btn-sm">Verify</button>
-                            </form>
-                        {% endif %}
-                        <a href="{{ doc.file.url }}" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="bi bi-download"></i></a>
-                    </div>
+    <!-- Personal & Education Card -->
+    <div class="card" style="border-radius:8px;margin-bottom:16px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">person_outline</i> Personal & Education Details
+        </span>
+        <table style="font-size:13px;width:100%;">
+          <tbody>
+            <tr>
+              <td style="width:50%;padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Full Name</div>
+                  <div class="col s7" style="padding:0;">{{ application.full_name }}</div>
                 </div>
-                {% empty %}
-                <p class="text-muted small p-3 mb-0">No documents uploaded.</p>
-                {% endfor %}
-            </div>
-        </div>
+              </td>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Date of Birth</div>
+                  <div class="col s7" style="padding:0;">{{ application.date_of_birth|date:"d M Y"|default:"—" }}</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Gender</div>
+                  <div class="col s7" style="padding:0;">{{ application.get_gender_display|default:"—" }}</div>
+                </div>
+              </td>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Province</div>
+                  <div class="col s7" style="padding:0;">{{ application.province }}</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Email</div>
+                  <div class="col s7" style="padding:0;">
+                    <a href="mailto:{{ application.email }}" style="color:#003087;">{{ application.email }}</a>
+                  </div>
+                </div>
+              </td>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Phone</div>
+                  <div class="col s7" style="padding:0;">{{ application.phone|default:"—" }}</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Qualification</div>
+                  <div class="col s7" style="padding:0;">
+                    <span class="chip" style="background:#e3eaf6;color:#003087;font-size:11px;">
+                      {{ application.get_qualification_display }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Institution</div>
+                  <div class="col s7" style="padding:0;">{{ application.institution|default:"—" }}</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Field of Study</div>
+                  <div class="col s7" style="padding:0;">{{ application.field_of_study|default:"—" }}</div>
+                </div>
+              </td>
+              <td style="padding:6px 0;">
+                <div class="row" style="margin:0;">
+                  <div class="col s5" style="color:#888;font-weight:600;padding:0;">Grad Year</div>
+                  <div class="col s7" style="padding:0;">{{ application.graduation_year|default:"—" }}</div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;" colspan="2">
+                <div class="row" style="margin:0;">
+                  <div class="col s3" style="color:#888;font-weight:600;padding:0;">Experience</div>
+                  <div class="col s9" style="padding:0;">{{ application.years_experience|default:"0" }} year{{ application.years_experience|pluralize }}</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-        <!-- Interviews -->
-        {% if interviews %}
-        <div class="card mb-3">
-            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold"><i class="bi bi-camera-video me-2"></i>Interviews</h6></div>
-            <div class="card-body">
-                {% for interview in interviews %}
-                <div class="border rounded p-3 mb-2">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <strong>{{ interview.scheduled_date|date:"l, d F Y" }}</strong> at {{ interview.scheduled_date|time:"H:i" }}<br>
-                            <small class="text-muted">Venue: {{ interview.venue }}</small><br>
-                            <small>Panel: {% for m in interview.panel_members.all %}{{ m.get_full_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</small>
-                        </div>
-                        <div>
-                            <span class="badge bg-{{ interview.status }}">{{ interview.get_status_display }}</span>
-                            {% with avg=interview.average_panel_score %}
-                            {% if avg %}<span class="badge bg-success ms-1">Score: {{ avg }}/100</span>{% endif %}
-                            {% endwith %}
-                        </div>
-                    </div>
-                    {% for pscore in interview.panel_scores.all %}
-                    <div class="mt-2 small text-muted border-top pt-2">
-                        <i class="bi bi-person-check me-1"></i>{{ pscore.panel_member.get_full_name }}: {{ pscore.score }}/100
-                        {% if pscore.recommendation %} — {{ pscore.get_recommendation_display }}{% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endfor %}
-            </div>
+    <!-- Work History + Cover Letter Collapsible -->
+    <ul class="collapsible" style="border-radius:8px;margin-bottom:16px;">
+      <li>
+        <div class="collapsible-header" style="font-weight:600;color:#003087;">
+          <i class="material-icons">business_center</i> Work History
         </div>
+        <div class="collapsible-body" style="padding:16px;">
+          {% if application.work_history %}
+            <p style="white-space:pre-line;font-size:13px;">{{ application.work_history }}</p>
+          {% else %}
+            <p style="color:#aaa;font-style:italic;">No work history provided.</p>
+          {% endif %}
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header" style="font-weight:600;color:#003087;">
+          <i class="material-icons">edit_note</i> Cover Letter
+        </div>
+        <div class="collapsible-body" style="padding:16px;">
+          {% if application.cover_letter %}
+            <p style="white-space:pre-line;font-size:13px;line-height:1.7;">{{ application.cover_letter }}</p>
+          {% else %}
+            <p style="color:#aaa;font-style:italic;">No cover letter provided.</p>
+          {% endif %}
+        </div>
+      </li>
+    </ul>
+
+    <!-- AI Summary Box -->
+    {% if ai_summary %}
+      <div class="ai-summary-box" style="background:linear-gradient(135deg,#e8f4fd,#f0e8ff);border-left:4px solid #003087;border-radius:8px;padding:16px 20px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <i class="material-icons" style="color:#003087;font-size:20px;">smart_toy</i>
+          <strong style="color:#003087;font-size:14px;">AI Screening Summary</strong>
+          <span class="chip" style="background:#003087;color:#fff;font-size:10px;margin-left:auto;">Auto-generated</span>
+        </div>
+        <p style="font-size:13px;line-height:1.7;color:#333;margin:0;white-space:pre-line;">{{ ai_summary }}</p>
+      </div>
+    {% endif %}
+
+    <!-- Documents Card -->
+    <div class="card" style="border-radius:8px;margin-bottom:16px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">attach_file</i> Supporting Documents
+        </span>
+        {% if application.documents.all %}
+          <ul class="collection" style="border:none;margin:0;">
+            {% for doc in application.documents.all %}
+              <li class="collection-item" style="padding:10px 0;display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <i class="material-icons" style="color:#003087;">insert_drive_file</i>
+                  <div>
+                    <div style="font-weight:600;font-size:13px;">{{ doc.get_document_type_display }}</div>
+                    <div style="font-size:11px;color:#888;">
+                      Uploaded {{ doc.uploaded_at|date:"d M Y" }}
+                      {% if doc.is_verified %}
+                        &bull; <span style="color:#2e7d32;"><i class="material-icons tiny">verified</i> Verified</span>
+                      {% else %}
+                        &bull; <span style="color:#e65100;">Unverified</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;">
+                  {% if not doc.is_verified %}
+                    <a href="{% url 'hr_admin:verify_document' doc.pk %}"
+                       class="btn-small tooltipped" data-position="top" data-tooltip="Mark Verified"
+                       style="background:#2e7d32;padding:0 10px;">
+                      <i class="material-icons" style="font-size:14px;">verified</i>
+                    </a>
+                  {% endif %}
+                  <a href="{{ doc.file.url }}" target="_blank"
+                     class="btn-small" style="background:#003087;padding:0 10px;">
+                    <i class="material-icons" style="font-size:14px;">download</i>
+                  </a>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p style="color:#aaa;font-style:italic;text-align:center;padding:20px;">No documents uploaded.</p>
         {% endif %}
+      </div>
     </div>
 
-    <!-- Right Panel -->
-    <div class="col-md-4">
-        <!-- Score Card -->
-        <div class="card mb-3">
-            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold"><i class="bi bi-star me-2"></i>AI Score</h6></div>
-            <div class="card-body text-center">
-                {% if application.total_score %}
-                <div class="display-4 fw-bold {% if application.total_score >= 70 %}text-success{% elif application.total_score >= 50 %}text-warning{% else %}text-danger{% endif %}">
-                    {{ application.total_score }}
+    <!-- Interviews Card -->
+    {% if interviews %}
+      <div class="card" style="border-radius:8px;margin-bottom:16px;">
+        <div class="card-content">
+          <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+            <i class="material-icons tiny">event</i> Interview Records
+          </span>
+          {% for interview in interviews %}
+            <div style="border:1px solid #e0e0e0;border-radius:6px;padding:14px;margin-bottom:12px;">
+              <div class="row" style="margin-bottom:8px;">
+                <div class="col s6">
+                  <span style="color:#888;font-size:12px;">Date &amp; Time</span>
+                  <div style="font-weight:600;font-size:13px;">{{ interview.scheduled_at|date:"d M Y" }} at {{ interview.scheduled_at|time:"H:i" }}</div>
                 </div>
-                <p class="text-muted small">out of 100</p>
-                {% else %}
-                <p class="text-muted">Not yet scored</p>
-                {% endif %}
-                <form method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="rescore">
-                    <button type="submit" class="btn btn-outline-info btn-sm w-100 mb-2">
-                        <i class="bi bi-robot me-1"></i>Re-run AI Score
-                    </button>
-                </form>
-                <a href="{% url 'hr_admin:interview_schedule' application.pk %}" class="btn btn-outline-primary btn-sm w-100">
-                    <i class="bi bi-calendar-plus me-1"></i>Schedule Interview
-                </a>
+                <div class="col s6">
+                  <span style="color:#888;font-size:12px;">Venue</span>
+                  <div style="font-weight:600;font-size:13px;">{{ interview.venue|default:"TBA" }}</div>
+                </div>
+              </div>
+              {% if interview.panel_members.all %}
+                <div style="margin-bottom:8px;">
+                  <span style="color:#888;font-size:12px;">Panel Members</span>
+                  <div style="margin-top:4px;">
+                    {% for member in interview.panel_members.all %}
+                      <span class="chip" style="font-size:11px;background:#e3eaf6;color:#003087;">{{ member.get_full_name }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+              {% if interview.scores.all %}
+                <div style="margin-top:10px;">
+                  <span style="color:#888;font-size:12px;display:block;margin-bottom:6px;">Panel Scores</span>
+                  <table class="striped" style="font-size:12px;">
+                    <thead>
+                      <tr>
+                        <th>Panelist</th>
+                        <th>Communication</th>
+                        <th>Knowledge</th>
+                        <th>Attitude</th>
+                        <th>Experience</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for score in interview.scores.all %}
+                        <tr>
+                          <td>{{ score.panelist.get_full_name }}</td>
+                          <td>{{ score.communication }}/20</td>
+                          <td>{{ score.knowledge }}/30</td>
+                          <td>{{ score.attitude }}/25</td>
+                          <td>{{ score.experience }}/25</td>
+                          <td>
+                            <strong>
+                              {% if score.total >= 70 %}
+                                <span style="color:#2e7d32;">{{ score.total }}</span>
+                              {% elif score.total >= 50 %}
+                                <span style="color:#f57c00;">{{ score.total }}</span>
+                              {% else %}
+                                <span style="color:#c62828;">{{ score.total }}</span>
+                              {% endif %}
+                            </strong>/100
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% endif %}
             </div>
+          {% endfor %}
         </div>
+      </div>
+    {% endif %}
 
-        <!-- Update Status -->
-        <div class="card mb-3">
-            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold"><i class="bi bi-arrow-repeat me-2"></i>Update Status</h6></div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="update_status">
-                    <div class="mb-2">
-                        <select name="status" class="form-select form-select-sm">
-                            {% for val, label in statuses %}
-                            <option value="{{ val }}" {% if application.status == val %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <textarea name="hr_notes" class="form-control form-control-sm" rows="2"
-                                  placeholder="HR notes (optional)...">{{ application.hr_notes }}</textarea>
-                    </div>
-                    <button type="submit" class="btn btn-pngcs btn-sm w-100">Update & Notify Applicant</button>
-                </form>
-            </div>
-        </div>
+  </div><!-- /left col -->
 
-        <!-- References -->
-        <div class="card">
-            <div class="card-header bg-white border-bottom"><h6 class="mb-0 fw-bold"><i class="bi bi-people me-2"></i>References</h6></div>
-            <div class="card-body small">
-                <p class="mb-1"><strong>{{ application.reference1_name }}</strong></p>
-                <p class="mb-1 text-muted">{{ application.reference1_position }}</p>
-                <p class="mb-2">{{ application.reference1_phone }}</p>
-                {% if application.reference2_name %}
-                <p class="mb-1"><strong>{{ application.reference2_name }}</strong></p>
-                <p class="mb-1 text-muted">{{ application.reference2_position }}</p>
-                <p class="mb-0">{{ application.reference2_phone }}</p>
-                {% endif %}
-            </div>
-        </div>
+  <!-- RIGHT COLUMN -->
+  <div class="col s12 m4">
+
+    <!-- Score Card -->
+    <div class="card" style="border-radius:8px;margin-bottom:16px;">
+      <div class="card-content" style="text-align:center;">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;text-align:left;display:block;">
+          <i class="material-icons tiny">analytics</i> AI Score
+        </span>
+        {% if application.score is not None %}
+          <div class="score-display {% if application.score >= 70 %}hi{% elif application.score >= 50 %}md{% else %}lo{% endif %}"
+               style="font-size:4rem;font-weight:800;margin:16px 0 4px;
+               {% if application.score >= 70 %}color:#2e7d32;
+               {% elif application.score >= 50 %}color:#e65100;
+               {% else %}color:#c62828;{% endif %}">
+            {{ application.score }}
+          </div>
+          <div style="font-size:13px;color:#888;margin-bottom:16px;">out of 100</div>
+        {% else %}
+          <div style="font-size:3rem;color:#ccc;margin:16px 0 4px;">—</div>
+          <div style="font-size:13px;color:#bbb;margin-bottom:16px;">Not yet scored</div>
+        {% endif %}
+        <a href="{% url 'hr_admin:rescore_application' application.pk %}"
+           class="btn btn-block" style="background:#003087;width:100%;margin-bottom:8px;">
+          <i class="material-icons left">refresh</i>Re-score
+        </a>
+        <a href="{% url 'hr_admin:schedule_interview' application.pk %}"
+           class="btn btn-block" style="background:#2e7d32;width:100%;">
+          <i class="material-icons left">event</i>Schedule Interview
+        </a>
+      </div>
     </div>
+
+    <!-- Update Status Card -->
+    <div class="card" style="border-radius:8px;margin-bottom:16px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">update</i> Update Status
+        </span>
+        <form method="post" action="{% url 'hr_admin:update_application_status' application.pk %}">
+          {% csrf_token %}
+          <div class="input-field">
+            <select id="status-select" name="status">
+              {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if application.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label for="status-select">Application Status</label>
+          </div>
+          <div class="input-field">
+            <textarea id="hr-notes" name="hr_notes"
+                      class="materialize-textarea"
+                      style="min-height:80px;">{{ application.hr_notes|default:'' }}</textarea>
+            <label for="hr-notes">HR Notes</label>
+          </div>
+          <button type="submit" class="btn" style="background:#003087;width:100%;">
+            <i class="material-icons left">send</i>Update &amp; Notify
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- References Card -->
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content">
+        <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+          <i class="material-icons tiny">contacts</i> References
+        </span>
+
+        {% if application.reference1_name %}
+          <div style="margin-bottom:16px;">
+            <div style="font-weight:700;font-size:13px;color:#003087;margin-bottom:6px;">
+              <i class="material-icons tiny">person</i> Reference 1
+            </div>
+            <table style="font-size:12px;width:100%;">
+              <tr><td style="color:#888;width:40%;">Name</td><td>{{ application.reference1_name }}</td></tr>
+              <tr><td style="color:#888;">Position</td><td>{{ application.reference1_position|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Organisation</td><td>{{ application.reference1_organisation|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Phone</td><td>{{ application.reference1_phone|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Email</td><td>
+                {% if application.reference1_email %}
+                  <a href="mailto:{{ application.reference1_email }}" style="color:#003087;">{{ application.reference1_email }}</a>
+                {% else %}—{% endif %}
+              </td></tr>
+            </table>
+          </div>
+        {% endif %}
+
+        {% if application.reference2_name %}
+          <div class="section-divider" style="border-top:1px solid #eee;margin:0 0 12px;"></div>
+          <div>
+            <div style="font-weight:700;font-size:13px;color:#003087;margin-bottom:6px;">
+              <i class="material-icons tiny">person</i> Reference 2
+            </div>
+            <table style="font-size:12px;width:100%;">
+              <tr><td style="color:#888;width:40%;">Name</td><td>{{ application.reference2_name }}</td></tr>
+              <tr><td style="color:#888;">Position</td><td>{{ application.reference2_position|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Organisation</td><td>{{ application.reference2_organisation|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Phone</td><td>{{ application.reference2_phone|default:"—" }}</td></tr>
+              <tr><td style="color:#888;">Email</td><td>
+                {% if application.reference2_email %}
+                  <a href="mailto:{{ application.reference2_email }}" style="color:#003087;">{{ application.reference2_email }}</a>
+                {% else %}—{% endif %}
+              </td></tr>
+            </table>
+          </div>
+        {% else %}
+          {% if not application.reference1_name %}
+            <p style="color:#aaa;font-style:italic;text-align:center;">No references provided.</p>
+          {% endif %}
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div><!-- /right col -->
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var collapsibles = document.querySelectorAll('.collapsible');
+    M.Collapsible.init(collapsibles);
+    var selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+    var tooltips = document.querySelectorAll('.tooltipped');
+    M.Tooltip.init(tooltips);
+    M.updateTextFields();
+  });
+</script>
 {% endblock %}

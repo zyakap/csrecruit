@@ -1,134 +1,253 @@
-{% extends 'base.html' %}
-{% block title %}My Applications - PNGCS{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Dashboard | PNGCS Recruitment Portal{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <div class="row mb-4 align-items-center">
-        <div class="col">
-            <h3 class="fw-bold mb-0" style="color: var(--pngcs-blue);">
-                <i class="bi bi-person-lines-fill me-2"></i>My Application Dashboard
-            </h3>
-            <p class="text-muted small mb-0">Welcome back, {{ request.user.first_name|default:request.user.username }}</p>
-        </div>
-        <div class="col-auto">
-            <a href="{% url 'recruitment:job_list' %}" class="btn btn-pngcs">
-                <i class="bi bi-briefcase me-2"></i>Browse Vacancies
-            </a>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <!-- Applications -->
-            <div class="card mb-4">
-                <div class="card-header bg-white border-bottom">
-                    <h6 class="fw-bold mb-0"><i class="bi bi-file-text me-2"></i>My Applications ({{ applications|length }})</h6>
-                </div>
-                <div class="card-body p-0">
-                    {% if applications %}
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Position</th>
-                                    <th>Submitted</th>
-                                    <th>Score</th>
-                                    <th>Status</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for app in applications %}
-                                <tr>
-                                    <td>
-                                        <strong>{{ app.vacancy.title }}</strong><br>
-                                        <small class="text-muted">{{ app.vacancy.department }}</small>
-                                    </td>
-                                    <td><small>{{ app.submitted_at|date:"d M Y" }}</small></td>
-                                    <td>
-                                        {% if app.total_score %}
-                                            <span class="badge {% if app.total_score >= 70 %}bg-success{% elif app.total_score >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
-                                                {{ app.total_score }}/100
-                                            </span>
-                                        {% else %}
-                                            <span class="text-muted small">Pending</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if app.status == 'submitted' %}<span class="badge bg-secondary">Submitted</span>
-                                        {% elif app.status == 'under_review' %}<span class="badge bg-info text-dark">Under Review</span>
-                                        {% elif app.status == 'shortlisted' %}<span class="badge bg-primary">Shortlisted</span>
-                                        {% elif app.status == 'interview_scheduled' %}<span class="badge bg-warning text-dark">Interview Scheduled</span>
-                                        {% elif app.status == 'interviewed' %}<span class="badge bg-info">Interviewed</span>
-                                        {% elif app.status == 'selected' %}<span class="badge bg-success">Selected</span>
-                                        {% elif app.status == 'rejected' %}<span class="badge bg-danger">Unsuccessful</span>
-                                        {% else %}<span class="badge bg-secondary">{{ app.get_status_display }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'recruitment:application_detail' app.pk %}" class="btn btn-outline-primary btn-sm">
-                                            View
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="text-center py-5">
-                        <i class="bi bi-file-text" style="font-size: 2.5rem; color: #ccc;"></i>
-                        <p class="text-muted mt-2">No applications yet. <a href="{% url 'recruitment:job_list' %}">Browse open vacancies</a></p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <!-- Notifications -->
-            <div class="card">
-                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">
-                        <i class="bi bi-bell me-2"></i>Notifications
-                        {% if unread_count %}<span class="badge bg-danger">{{ unread_count }}</span>{% endif %}
-                    </h6>
-                    {% if unread_count %}
-                    <a href="{% url 'recruitment:mark_all_read' %}" class="btn btn-outline-secondary btn-sm">Mark all read</a>
-                    {% endif %}
-                </div>
-                <div class="card-body p-0">
-                    {% if notifications %}
-                        {% for notif in notifications %}
-                        <div class="border-bottom p-3 {% if not notif.read %}bg-light{% endif %}">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <p class="mb-1 fw-semibold small">
-                                        {% if notif.notification_type == 'success' %}<i class="bi bi-check-circle-fill text-success me-1"></i>
-                                        {% elif notif.notification_type == 'warning' %}<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
-                                        {% elif notif.notification_type == 'interview' %}<i class="bi bi-camera-video-fill text-primary me-1"></i>
-                                        {% else %}<i class="bi bi-info-circle-fill text-info me-1"></i>{% endif %}
-                                        {{ notif.title }}
-                                    </p>
-                                    <p class="text-muted small mb-1">{{ notif.message|truncatewords:20 }}</p>
-                                    <small class="text-muted">{{ notif.created_at|date:"d M Y H:i" }}</small>
-                                </div>
-                                {% if not notif.read %}
-                                <a href="{% url 'recruitment:mark_read' notif.pk %}" class="btn btn-outline-secondary btn-sm ms-2">
-                                    <i class="bi bi-check"></i>
-                                </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="text-center py-4">
-                            <i class="bi bi-bell-slash" style="font-size: 1.8rem; color: #ccc;"></i>
-                            <p class="text-muted small mt-2">No notifications</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+<!-- Welcome Header -->
+<div style="background:linear-gradient(135deg,#003087 0%,#004cbf 100%); padding:2rem 0 1.5rem 0;">
+  <div class="container">
+    <div class="row valign-wrapper" style="margin:0;">
+      <div class="col s12 m8">
+        <h4 style="color:#fff; margin:0; font-weight:700; font-size:1.6rem;">
+          Welcome back, {{ request.user.get_full_name|default:request.user.username }}
+        </h4>
+        <p style="color:rgba(255,255,255,.75); margin:.4rem 0 0 0; font-size:.95rem;">
+          <i class="material-icons tiny" style="vertical-align:middle;">calendar_today</i>
+          Logged in as {{ request.user.email }}
+        </p>
+      </div>
+      <div class="col s12 m4 right-align">
+        <a href="{% url 'recruitment:job_list' %}"
+           class="btn-floating btn-large waves-effect waves-light tooltipped"
+           data-position="left" data-tooltip="Browse Vacancies"
+           style="background:#FFD700;">
+          <i class="material-icons" style="color:#003087;">search</i>
+        </a>
+        <span style="display:block; color:rgba(255,255,255,.65); font-size:.78rem; margin-top:.3rem;">
+          Browse Vacancies
+        </span>
+      </div>
     </div>
+  </div>
 </div>
+
+{% if messages %}
+<div class="container" style="margin-top:1rem;">
+  {% for message in messages %}
+    <div class="msg-flash {{ message.tags }}">
+      <i class="material-icons left">
+        {% if message.tags == 'success' %}check_circle
+        {% elif message.tags == 'warning' %}warning
+        {% else %}info{% endif %}
+      </i>
+      {{ message }}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="container" style="margin-top:1.5rem; margin-bottom:3rem;">
+  <div class="row">
+
+    <!-- LEFT COLUMN: Applications -->
+    <div class="col s12 m8">
+      <div class="card z-depth-1" style="border-radius:6px;">
+        <div class="card-content" style="padding:1.25rem 1.5rem;">
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:2px solid #FFD700; padding-bottom:.6rem;">
+            <h6 style="margin:0; font-weight:700; color:#003087; font-size:1.05rem;">
+              <i class="material-icons small" style="vertical-align:middle; margin-right:6px; color:#003087;">folder_open</i>
+              My Applications
+            </h6>
+            <span class="new badge" data-badge-caption="total"
+                  style="background:#003087; position:static; font-size:.78rem;">
+              {{ applications|length }}
+            </span>
+          </div>
+
+          {% if applications %}
+            <ul class="collection" style="border:none; margin:0;">
+              {% for application in applications %}
+              <li class="collection-item" style="padding:.85rem .5rem; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; flex-wrap:wrap; gap:.5rem;">
+
+                <!-- Icon -->
+                <div style="margin-right:.75rem; flex-shrink:0;">
+                  <div style="width:40px; height:40px; border-radius:50%; background:#E8EDF5; display:flex; align-items:center; justify-content:center;">
+                    <i class="material-icons" style="color:#003087; font-size:1.2rem;">description</i>
+                  </div>
+                </div>
+
+                <!-- Info block -->
+                <div style="flex:1; min-width:160px;">
+                  <div style="font-weight:600; color:#222; font-size:.95rem; margin-bottom:.2rem;">
+                    {{ application.vacancy.title }}
+                  </div>
+                  <div style="font-size:.8rem; color:#888;">
+                    <i class="material-icons tiny" style="vertical-align:middle;">account_balance</i>
+                    {{ application.vacancy.department }}
+                    &nbsp;&bull;&nbsp;
+                    <i class="material-icons tiny" style="vertical-align:middle;">calendar_today</i>
+                    Submitted: {{ application.submitted_at|date:"d M Y" }}
+                  </div>
+                </div>
+
+                <!-- Status chip -->
+                <div style="flex-shrink:0;">
+                  <span class="chip s-{{ application.status }}">
+                    {{ application.get_status_display }}
+                  </span>
+                </div>
+
+                <!-- Score chip -->
+                {% if application.score is not None %}
+                <div style="flex-shrink:0;">
+                  <span class="chip {% if application.score >= 75 %}score-hi{% elif application.score >= 50 %}score-md{% else %}score-lo{% endif %}"
+                        style="font-weight:700; font-size:.8rem;">
+                    {{ application.score }}%
+                  </span>
+                </div>
+                {% endif %}
+
+                <!-- View button -->
+                <div style="flex-shrink:0;">
+                  <a href="{% url 'recruitment:application_detail' application.pk %}"
+                     class="btn-small pngcs waves-effect waves-light"
+                     style="font-size:.78rem; padding:0 .85rem; height:2rem; line-height:2rem;">
+                    <i class="material-icons left" style="font-size:.9rem; line-height:2rem;">visibility</i>
+                    View
+                  </a>
+                </div>
+
+              </li>
+              {% endfor %}
+            </ul>
+
+          {% else %}
+            <!-- Empty state for applications -->
+            <div class="empty-state" style="padding:2.5rem 1rem;">
+              <i class="material-icons" style="font-size:3.5rem; color:#ddd; display:block; margin-bottom:.75rem;">folder_off</i>
+              <h6 style="color:#aaa; margin:0 0 .5rem 0;">No applications yet</h6>
+              <p style="color:#bbb; margin:0 0 1.25rem 0; font-size:.9rem;">
+                You haven't submitted any applications yet. Browse open vacancies to get started.
+              </p>
+              <a href="{% url 'recruitment:job_list' %}" class="btn pngcs waves-effect waves-light">
+                <i class="material-icons left">search</i>Browse Vacancies
+              </a>
+            </div>
+          {% endif %}
+
+        </div><!-- /card-content -->
+      </div><!-- /card -->
+    </div><!-- /left col -->
+
+    <!-- RIGHT COLUMN: Notifications -->
+    <div class="col s12 m4">
+      <div class="card z-depth-1" style="border-radius:6px;">
+        <div class="card-content" style="padding:1.25rem 1.5rem;">
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:2px solid #FFD700; padding-bottom:.6rem;">
+            <h6 style="margin:0; font-weight:700; color:#003087; font-size:1.05rem;">
+              <i class="material-icons small" style="vertical-align:middle; margin-right:6px; color:#003087;">notifications</i>
+              Notifications
+              {% if unread_count %}
+                <span class="new badge" data-badge-caption=""
+                      style="background:#c62828; position:static; font-size:.75rem; min-width:20px; padding:0 6px; margin-left:4px;">
+                  {{ unread_count }}
+                </span>
+              {% endif %}
+            </h6>
+            {% if unread_count %}
+              <a href="{% url 'recruitment:mark_all_read' %}"
+                 class="btn-flat btn-small waves-effect"
+                 style="font-size:.75rem; color:#003087; padding:0 .5rem; height:1.8rem; line-height:1.8rem;">
+                <i class="material-icons left tiny">done_all</i>Mark all read
+              </a>
+            {% endif %}
+          </div>
+
+          {% if notifications %}
+            {% for notif in notifications %}
+            <div class="notif-row" style="display:flex; align-items:flex-start; gap:.65rem; padding:.7rem 0; border-bottom:1px solid #f5f5f5; {% if not notif.is_read %}background:rgba(0,48,135,.04); margin:0 -.5rem; padding:0.7rem .5rem;{% endif %}">
+              <div class="notif-dot" style="flex-shrink:0; margin-top:.15rem;">
+                {% if not notif.is_read %}
+                  <i class="material-icons small"
+                     style="color:{% if notif.notif_type == 'success' %}#43a047{% elif notif.notif_type == 'warning' %}#f57c00{% elif notif.notif_type == 'error' %}#c62828{% else %}#003087{% endif %};">
+                    {% if notif.notif_type == 'success' %}check_circle
+                    {% elif notif.notif_type == 'warning' %}warning
+                    {% elif notif.notif_type == 'error' %}error
+                    {% else %}notifications_active{% endif %}
+                  </i>
+                {% else %}
+                  <i class="material-icons small" style="color:#ccc;">notifications_none</i>
+                {% endif %}
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:.88rem; font-weight:{% if not notif.is_read %}600{% else %}400{% endif %}; color:{% if not notif.is_read %}#222{% else %}#666{% endif %}; margin-bottom:.2rem;">
+                  {{ notif.title }}
+                </div>
+                <div class="truncate" style="font-size:.8rem; color:#999; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="{{ notif.message }}">
+                  {{ notif.message }}
+                </div>
+                <div style="font-size:.75rem; color:#bbb; margin-top:.3rem;">
+                  <i class="material-icons" style="font-size:.75rem; vertical-align:middle;">access_time</i>
+                  {{ notif.created_at|timesince }} ago
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+          {% else %}
+            <!-- Empty state for notifications -->
+            <div style="text-align:center; padding:2rem 1rem;">
+              <i class="material-icons" style="font-size:3rem; color:#ddd; display:block; margin-bottom:.5rem;">notifications_off</i>
+              <p style="color:#bbb; font-size:.88rem; margin:0;">No notifications yet.</p>
+            </div>
+          {% endif %}
+
+        </div><!-- /card-content -->
+      </div><!-- /notifications card -->
+
+      <!-- Quick Links Card -->
+      <div class="card z-depth-1" style="border-radius:6px; margin-top:0;">
+        <div class="card-content" style="padding:1.25rem 1.5rem;">
+          <h6 style="margin:0 0 .85rem 0; font-weight:700; color:#003087; font-size:.95rem; border-bottom:2px solid #FFD700; padding-bottom:.5rem;">
+            <i class="material-icons tiny" style="vertical-align:middle; margin-right:4px;">link</i>
+            Quick Links
+          </h6>
+          <ul style="margin:0; padding:0; list-style:none;">
+            <li style="margin-bottom:.5rem;">
+              <a href="{% url 'recruitment:job_list' %}" style="color:#003087; font-size:.88rem; display:flex; align-items:center; gap:.4rem;">
+                <i class="material-icons tiny">work_outline</i> Browse Open Vacancies
+              </a>
+            </li>
+            <li style="margin-bottom:.5rem;">
+              <a href="{% url 'account_email' %}" style="color:#003087; font-size:.88rem; display:flex; align-items:center; gap:.4rem;">
+                <i class="material-icons tiny">manage_accounts</i> Manage Profile
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'account_change_password' %}" style="color:#003087; font-size:.88rem; display:flex; align-items:center; gap:.4rem;">
+                <i class="material-icons tiny">lock_reset</i> Change Password
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div><!-- /right col -->
+
+  </div><!-- /row -->
+</div><!-- /container -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var tooltips = document.querySelectorAll('.tooltipped');
+    M.Tooltip.init(tooltips, {});
+  });
+</script>
 {% endblock %}

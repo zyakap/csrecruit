@@ -1,196 +1,241 @@
 {% extends 'hr_admin/base.html' %}
-{% block title %}HR Dashboard - PNGCS{% endblock %}
+{% load static %}
+
 {% block hr_content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0" style="color: var(--pngcs-blue);">
-        <i class="bi bi-speedometer2 me-2"></i>HR Administration Dashboard
-    </h4>
-    <a href="{% url 'hr_admin:vacancy_create' %}" class="btn btn-pngcs">
-        <i class="bi bi-plus-circle me-2"></i>Post New Vacancy
+<!-- Header Row -->
+<div class="row" style="margin-bottom:8px;align-items:center;">
+  <div class="col s12 m8">
+    <h5 style="color:#003087;font-weight:700;margin:0;">
+      <i class="material-icons" style="vertical-align:middle;margin-right:8px;">dashboard</i>
+      HR Administration Dashboard
+    </h5>
+    <p style="color:#666;margin:4px 0 0;">Papua New Guinea Civil Service Recruitment Portal</p>
+  </div>
+  <div class="col s12 m4" style="text-align:right;">
+    <a href="{% url 'hr_admin:vacancy_create' %}" class="btn" style="background:#003087;">
+      <i class="material-icons left">add</i>Post New Vacancy
     </a>
+  </div>
 </div>
 
-<!-- Stats Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card text-center border-0" style="background: linear-gradient(135deg, #003087, #1a4a9c);">
-            <div class="card-body text-white py-3">
-                <h2 class="fw-bold mb-0">{{ stats.total_applications }}</h2>
-                <p class="small mb-0">Total Applications</p>
-            </div>
-        </div>
+<!-- 4 Main Stat Cards -->
+<div class="row">
+  <div class="col s6 m3">
+    <div class="stat-card" style="background:#003087;color:#fff;border-radius:8px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,48,135,0.3);">
+      <div style="font-size:2.5rem;font-weight:700;">{{ total_applications|default:"0" }}</div>
+      <div style="font-size:13px;opacity:0.9;margin-top:4px;">
+        <i class="material-icons tiny">description</i> Total Applications
+      </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-center border-0" style="background: linear-gradient(135deg, #0066cc, #0080ff);">
-            <div class="card-body text-white py-3">
-                <h2 class="fw-bold mb-0">{{ stats.new_today }}</h2>
-                <p class="small mb-0">Received Today</p>
-            </div>
-        </div>
+  </div>
+  <div class="col s6 m3">
+    <div class="stat-card" style="background:#1565c0;color:#fff;border-radius:8px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(21,101,192,0.3);">
+      <div style="font-size:2.5rem;font-weight:700;">{{ today_applications|default:"0" }}</div>
+      <div style="font-size:13px;opacity:0.9;margin-top:4px;">
+        <i class="material-icons tiny">today</i> Today
+      </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-center border-0" style="background: linear-gradient(135deg, #28a745, #34ce57);">
-            <div class="card-body text-white py-3">
-                <h2 class="fw-bold mb-0">{{ stats.shortlisted }}</h2>
-                <p class="small mb-0">Shortlisted</p>
-            </div>
-        </div>
+  </div>
+  <div class="col s6 m3">
+    <div class="stat-card" style="background:#2e7d32;color:#fff;border-radius:8px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(46,125,50,0.3);">
+      <div style="font-size:2.5rem;font-weight:700;">{{ shortlisted_count|default:"0" }}</div>
+      <div style="font-size:13px;opacity:0.9;margin-top:4px;">
+        <i class="material-icons tiny">star</i> Shortlisted
+      </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-center border-0" style="background: linear-gradient(135deg, #ffc107, #ffca2c);">
-            <div class="card-body py-3">
-                <h2 class="fw-bold mb-0">{{ stats.interviews_today }}</h2>
-                <p class="small mb-0">Interviews Today</p>
-            </div>
-        </div>
+  </div>
+  <div class="col s6 m3">
+    <div class="stat-card" style="background:#e65100;color:#fff;border-radius:8px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(230,81,0,0.3);">
+      <div style="font-size:2.5rem;font-weight:700;">{{ interviews_today|default:"0" }}</div>
+      <div style="font-size:13px;opacity:0.9;margin-top:4px;">
+        <i class="material-icons tiny">event</i> Interviews Today
+      </div>
     </div>
+  </div>
 </div>
 
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card border-0 bg-light text-center">
-            <div class="card-body py-2">
-                <h4 class="fw-bold text-primary mb-0">{{ stats.open_vacancies }}</h4>
-                <small class="text-muted">Open Vacancies</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-light text-center">
-            <div class="card-body py-2">
-                <h4 class="fw-bold text-info mb-0">{{ stats.under_review }}</h4>
-                <small class="text-muted">Under Review</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-light text-center">
-            <div class="card-body py-2">
-                <h4 class="fw-bold text-success mb-0">{{ stats.selected }}</h4>
-                <small class="text-muted">Selected</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 bg-light text-center">
-            <div class="card-body py-2">
-                <h4 class="fw-bold mb-0">{{ stats.total_vacancies }}</h4>
-                <small class="text-muted">Total Vacancies</small>
-            </div>
-        </div>
-    </div>
+<!-- 4 Smaller Stat Chips -->
+<div class="row" style="margin-bottom:8px;">
+  <div class="col s12">
+    <span class="chip" style="background:#e3eaf6;color:#003087;font-weight:600;margin-right:8px;">
+      <i class="material-icons tiny">work_outline</i>&nbsp; Open Vacancies: <strong>{{ open_vacancies|default:"0" }}</strong>
+    </span>
+    <span class="chip" style="background:#fff3e0;color:#e65100;font-weight:600;margin-right:8px;">
+      <i class="material-icons tiny">hourglass_empty</i>&nbsp; Under Review: <strong>{{ under_review_count|default:"0" }}</strong>
+    </span>
+    <span class="chip" style="background:#e8f5e9;color:#2e7d32;font-weight:600;margin-right:8px;">
+      <i class="material-icons tiny">check_circle</i>&nbsp; Selected: <strong>{{ selected_count|default:"0" }}</strong>
+    </span>
+    <span class="chip" style="background:#ede7f6;color:#4527a0;font-weight:600;">
+      <i class="material-icons tiny">folder</i>&nbsp; Total Vacancies: <strong>{{ total_vacancies|default:"0" }}</strong>
+    </span>
+  </div>
 </div>
 
-<div class="row g-3 mb-4">
-    <!-- Charts -->
-    <div class="col-md-7">
-        <div class="card">
-            <div class="card-header bg-white border-bottom">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-geo-alt me-2"></i>Applications by Province</h6>
-            </div>
-            <div class="card-body">
-                <canvas id="provinceChart" height="200"></canvas>
-            </div>
-        </div>
+<!-- Charts Row -->
+<div class="row">
+  <div class="col s12 m8">
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content">
+        <span class="card-title" style="font-size:16px;color:#003087;font-weight:600;">
+          <i class="material-icons tiny">bar_chart</i> Applications by Province
+        </span>
+        <canvas id="provinceChart" height="120"></canvas>
+      </div>
     </div>
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-header bg-white border-bottom">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-pie-chart me-2"></i>Application Status</h6>
-            </div>
-            <div class="card-body">
-                <canvas id="statusChart" height="200"></canvas>
-            </div>
-        </div>
+  </div>
+  <div class="col s12 m4">
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content">
+        <span class="card-title" style="font-size:16px;color:#003087;font-weight:600;">
+          <i class="material-icons tiny">donut_large</i> Status Distribution
+        </span>
+        <canvas id="statusChart" height="200"></canvas>
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- Open Vacancies -->
-<div class="row g-3">
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-header bg-white border-bottom d-flex justify-content-between">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-briefcase me-2"></i>Open Vacancies</h6>
-                <a href="{% url 'hr_admin:vacancy_list' %}" class="btn btn-outline-primary btn-sm">View All</a>
-            </div>
-            <div class="card-body p-0">
-                {% for vacancy in open_vacancies %}
-                <div class="border-bottom px-3 py-2 d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="mb-0 fw-semibold small">{{ vacancy.title }}</p>
-                        <small class="text-muted">{{ vacancy.province }} | Closes {{ vacancy.close_date|date:"d M" }}</small>
-                    </div>
-                    <span class="badge bg-primary">{{ vacancy.app_count }} apps</span>
+<!-- Open Vacancies + Recent Applications Row -->
+<div class="row">
+  <div class="col s12 m5">
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content" style="padding-bottom:0;">
+        <span class="card-title" style="font-size:16px;color:#003087;font-weight:600;">
+          <i class="material-icons tiny">work</i> Open Vacancies
+        </span>
+      </div>
+      {% if open_vacancy_list %}
+        <ul class="collection" style="margin:0;border:none;">
+          {% for vacancy in open_vacancy_list %}
+            <li class="collection-item" style="padding:10px 20px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-weight:600;font-size:13px;color:#003087;">{{ vacancy.title }}</div>
+                  <div style="font-size:11px;color:#888;">{{ vacancy.department }} &bull; Closes {{ vacancy.close_date }}</div>
                 </div>
-                {% empty %}
-                <p class="text-muted small p-3 mb-0">No open vacancies.</p>
-                {% endfor %}
-            </div>
+                <span class="chip" style="background:#e3eaf6;color:#003087;font-size:11px;min-width:32px;justify-content:center;">
+                  {{ vacancy.application_count|default:"0" }}
+                </span>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-state" style="padding:24px;text-align:center;color:#aaa;">
+          <i class="material-icons" style="font-size:40px;">work_off</i>
+          <p>No open vacancies</p>
         </div>
+      {% endif %}
     </div>
-    <div class="col-md-7">
-        <div class="card">
-            <div class="card-header bg-white border-bottom d-flex justify-content-between">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2"></i>Recent Applications</h6>
-                <a href="{% url 'hr_admin:application_list' %}" class="btn btn-outline-primary btn-sm">View All</a>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover table-sm mb-0">
-                        <thead class="table-light">
-                            <tr><th>Name</th><th>Position</th><th>Score</th><th>Status</th><th></th></tr>
-                        </thead>
-                        <tbody>
-                            {% for app in recent_applications %}
-                            <tr>
-                                <td><small>{{ app.full_name }}</small></td>
-                                <td><small>{{ app.vacancy.title|truncatechars:25 }}</small></td>
-                                <td>
-                                    {% if app.total_score %}
-                                    <span class="badge {% if app.total_score >= 70 %}bg-success{% elif app.total_score >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %} small">{{ app.total_score }}</span>
-                                    {% else %}<span class="text-muted small">-</span>{% endif %}
-                                </td>
-                                <td><span class="badge bg-secondary small">{{ app.get_status_display }}</span></td>
-                                <td><a href="{% url 'hr_admin:application_detail' app.pk %}" class="btn btn-outline-secondary btn-sm py-0">View</a></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+  </div>
+
+  <div class="col s12 m7">
+    <div class="card" style="border-radius:8px;">
+      <div class="card-content" style="padding-bottom:0;">
+        <span class="card-title" style="font-size:16px;color:#003087;font-weight:600;">
+          <i class="material-icons tiny">history</i> Recent Applications
+        </span>
+      </div>
+      {% if recent_applications %}
+        <div class="responsive-table">
+          <table class="striped hoverable" style="font-size:13px;">
+            <thead style="background:#f5f6fa;">
+              <tr>
+                <th style="color:#003087;">Name</th>
+                <th style="color:#003087;">Position</th>
+                <th style="color:#003087;">Score</th>
+                <th style="color:#003087;">Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for app in recent_applications %}
+                <tr>
+                  <td style="font-weight:600;">{{ app.full_name }}</td>
+                  <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    {{ app.vacancy.title }}
+                  </td>
+                  <td>
+                    {% if app.score is not None %}
+                      {% if app.score >= 70 %}
+                        <span class="chip score-hi" style="font-size:11px;">{{ app.score }}</span>
+                      {% elif app.score >= 50 %}
+                        <span class="chip score-md" style="font-size:11px;">{{ app.score }}</span>
+                      {% else %}
+                        <span class="chip score-lo" style="font-size:11px;">{{ app.score }}</span>
+                      {% endif %}
+                    {% else %}
+                      <span class="chip" style="font-size:11px;background:#eee;color:#999;">N/A</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="chip s-{{ app.status }}" style="font-size:11px;">{{ app.get_status_display }}</span>
+                  </td>
+                  <td>
+                    <a href="{% url 'hr_admin:application_detail' app.pk %}" class="btn-small" style="background:#003087;">
+                      <i class="material-icons" style="font-size:14px;">visibility</i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+      {% else %}
+        <div class="empty-state" style="padding:24px;text-align:center;color:#aaa;">
+          <i class="material-icons" style="font-size:40px;">inbox</i>
+          <p>No recent applications</p>
+        </div>
+      {% endif %}
     </div>
+  </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-const provinceCtx = document.getElementById('provinceChart').getContext('2d');
-new Chart(provinceCtx, {
+  const provinceLabels = {{ province_labels|safe }};
+  const provinceCounts = {{ province_counts|safe }};
+  const statusLabels = {{ status_labels|safe }};
+  const statusCounts = {{ status_counts|safe }};
+
+  // Province Bar Chart
+  new Chart(document.getElementById('provinceChart'), {
     type: 'bar',
     data: {
-        labels: {{ province_labels|safe }},
-        datasets: [{
-            label: 'Applications',
-            data: {{ province_counts|safe }},
-            backgroundColor: '#003087',
-            borderRadius: 4,
-        }]
+      labels: provinceLabels,
+      datasets: [{
+        label: 'Applications',
+        data: provinceCounts,
+        backgroundColor: '#003087',
+        borderRadius: 4,
+      }]
     },
-    options: { responsive: true, plugins: { legend: { display: false } } }
-});
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
 
-const statusCtx = document.getElementById('statusChart').getContext('2d');
-new Chart(statusCtx, {
+  // Status Doughnut Chart
+  new Chart(document.getElementById('statusChart'), {
     type: 'doughnut',
     data: {
-        labels: {{ status_labels|safe }},
-        datasets: [{
-            data: {{ status_counts|safe }},
-            backgroundColor: ['#003087','#0066cc','#28a745','#ffc107','#17a2b8','#dc3545','#6c757d','#fd7e14'],
-        }]
+      labels: statusLabels,
+      datasets: [{
+        data: statusCounts,
+        backgroundColor: ['#003087','#1565c0','#2e7d32','#f9a825','#c62828','#6a1b9a','#00838f'],
+        borderWidth: 2,
+      }]
     },
-    options: { responsive: true }
-});
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+    }
+  });
 </script>
 {% endblock %}

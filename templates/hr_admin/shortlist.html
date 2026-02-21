@@ -1,131 +1,216 @@
 {% extends 'hr_admin/base.html' %}
-{% block title %}Shortlist - {{ vacancy.title }}{% endblock %}
+{% load static %}
+
 {% block hr_content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="fw-bold mb-0"><i class="bi bi-star me-2"></i>Shortlisting — {{ vacancy.title }}</h4>
-    <div class="d-flex gap-2">
-        <a href="{% url 'hr_admin:export_shortlist' vacancy.pk %}" class="btn btn-success btn-sm">
-            <i class="bi bi-download me-1"></i>Export Excel
-        </a>
-        <a href="{% url 'hr_admin:vacancy_list' %}" class="btn btn-outline-secondary btn-sm">Back</a>
-    </div>
+<!-- Header -->
+<div class="row" style="margin-bottom:16px;align-items:center;">
+  <div class="col s12 m7">
+    <h5 style="color:#003087;font-weight:700;margin:0;">
+      <i class="material-icons" style="vertical-align:middle;margin-right:8px;">star</i>
+      Shortlisting — {{ vacancy.title }}
+    </h5>
+    <p style="color:#666;margin:4px 0 0;">
+      Ref: {{ vacancy.reference_number }} &bull; {{ vacancy.department }}
+    </p>
+  </div>
+  <div class="col s12 m5" style="text-align:right;display:flex;gap:8px;justify-content:flex-end;">
+    <a href="{% url 'hr_admin:export_shortlist' vacancy.pk %}" class="btn" style="background:#2e7d32;">
+      <i class="material-icons left">download</i>Export Excel
+    </a>
+    <a href="{% url 'hr_admin:vacancy_list' %}" class="btn-flat" style="color:#003087;">
+      <i class="material-icons left">arrow_back</i>Back
+    </a>
+  </div>
 </div>
 
 <!-- Threshold Filter -->
-<div class="card mb-3">
-    <div class="card-body py-2">
-        <form method="get" class="row g-2 align-items-end">
-            <div class="col-auto">
-                <label class="form-label small fw-semibold mb-0">Minimum Score Threshold:</label>
-                <div class="input-group input-group-sm">
-                    <input type="number" name="threshold" class="form-control" value="{{ threshold }}" min="0" max="100">
-                    <button type="submit" class="btn btn-pngcs">Apply</button>
-                </div>
-            </div>
-            <div class="col">
-                <span class="badge bg-success ms-2">{{ qualified|length }} Qualified</span>
-                <span class="badge bg-danger ms-1">{{ below_threshold|length }} Below Threshold</span>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div class="card mb-3">
-    <div class="card-header bg-success text-white">
-        <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Qualified Applicants (Score ≥ {{ threshold }})</h6>
-    </div>
-    <div class="card-body p-0">
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="shortlist">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th><input type="checkbox" id="checkAll" class="form-check-input"></th>
-                            <th>Rank</th>
-                            <th>Name</th>
-                            <th>Province</th>
-                            <th>Qualification</th>
-                            <th>Grade</th>
-                            <th>Experience</th>
-                            <th>Score</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for app in qualified %}
-                        <tr>
-                            <td><input type="checkbox" name="selected_ids" value="{{ app.pk }}" class="form-check-input app-check"
-                                {% if app.status == 'shortlisted' or app.status == 'selected' %}checked{% endif %}></td>
-                            <td><strong>{{ forloop.counter }}</strong></td>
-                            <td>
-                                <a href="{% url 'hr_admin:application_detail' app.pk %}" class="text-decoration-none">
-                                    <strong>{{ app.full_name }}</strong>
-                                </a><br>
-                                <small class="text-muted">{{ app.email }}</small>
-                            </td>
-                            <td><small>{{ app.province }}</small></td>
-                            <td><small>{{ app.get_highest_qualification_display }}</small></td>
-                            <td><small>{{ app.grade_result }}</small></td>
-                            <td><small>{{ app.years_experience }} yr(s)</small></td>
-                            <td>
-                                <span class="badge {% if app.total_score >= 70 %}bg-success{% elif app.total_score >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
-                                    {{ app.total_score }}
-                                </span>
-                            </td>
-                            <td><span class="badge bg-secondary">{{ app.get_status_display }}</span></td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="9" class="text-center text-muted py-3">No qualified applicants above threshold.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% if qualified %}
-            <div class="p-3 border-top bg-light">
-                <button type="submit" class="btn btn-success"
-                        onclick="return confirm('Shortlist selected applicants and notify them? Others will be marked as rejected.')">
-                    <i class="bi bi-star-fill me-2"></i>Confirm Shortlist & Notify Applicants
-                </button>
-            </div>
-            {% endif %}
-        </form>
-    </div>
-</div>
-
-{% if below_threshold %}
-<div class="card">
-    <div class="card-header bg-light">
-        <h6 class="mb-0 text-muted"><i class="bi bi-x-circle me-2"></i>Below Threshold (Score &lt; {{ threshold }})</h6>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-sm mb-0">
-                <thead class="table-light">
-                    <tr><th>Name</th><th>Province</th><th>Qualification</th><th>Score</th></tr>
-                </thead>
-                <tbody>
-                    {% for app in below_threshold %}
-                    <tr class="text-muted">
-                        <td>{{ app.full_name }}</td>
-                        <td>{{ app.province }}</td>
-                        <td>{{ app.get_highest_qualification_display }}</td>
-                        <td><span class="badge bg-danger">{{ app.total_score }}</span></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="card" style="border-radius:8px;margin-bottom:16px;">
+  <div class="card-content" style="padding:16px 20px;">
+    <form method="get" action="" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <label style="font-weight:600;color:#003087;white-space:nowrap;">Score Threshold:</label>
+        <div class="input-field" style="margin:0;min-width:100px;">
+          <input type="number" id="threshold" name="threshold"
+                 value="{{ threshold|default:50 }}" min="0" max="100"
+                 style="margin:0;">
+          <label for="threshold">Min Score</label>
         </div>
-    </div>
+        <button type="submit" class="btn" style="background:#003087;">
+          <i class="material-icons left">tune</i>Apply
+        </button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="chip" style="background:#e8f5e9;color:#2e7d32;font-weight:700;">
+          <i class="material-icons tiny">check_circle</i>&nbsp; Qualified: {{ qualified_count|default:"0" }}
+        </span>
+        <span class="chip" style="background:#ffebee;color:#c62828;font-weight:700;">
+          <i class="material-icons tiny">cancel</i>&nbsp; Below Threshold: {{ below_count|default:"0" }}
+        </span>
+      </div>
+    </form>
+  </div>
 </div>
+
+<!-- Qualified Applicants Card -->
+<div class="card" style="border-radius:8px;margin-bottom:16px;">
+  <div class="card-content" style="padding-bottom:0;">
+    <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
+      <i class="material-icons tiny" style="color:#2e7d32;">check_circle</i>
+      Qualified Applicants
+      <span class="chip new" style="background:#2e7d32;color:#fff;font-size:11px;float:right;">{{ qualified_count|default:"0" }}</span>
+    </span>
+  </div>
+  {% if qualified_applicants %}
+    <form method="post" action="{% url 'hr_admin:confirm_shortlist' vacancy.pk %}">
+      {% csrf_token %}
+      <div class="responsive-table">
+        <table class="striped hoverable" style="font-size:13px;">
+          <thead style="background:#003087;">
+            <tr>
+              <th style="color:#fff;width:40px;">
+                <label>
+                  <input type="checkbox" id="select-all" class="filled-in"/>
+                  <span style="color:#fff;">&nbsp;</span>
+                </label>
+              </th>
+              <th style="color:#fff;">Rank</th>
+              <th style="color:#fff;">Name</th>
+              <th style="color:#fff;">Province</th>
+              <th style="color:#fff;">Qualification</th>
+              <th style="color:#fff;">Grade</th>
+              <th style="color:#fff;">Experience</th>
+              <th style="color:#fff;">Score</th>
+              <th style="color:#fff;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for app in qualified_applicants %}
+              <tr>
+                <td>
+                  <label>
+                    <input type="checkbox" name="selected_apps" value="{{ app.pk }}"
+                           class="filled-in app-checkbox"
+                           {% if app.status == 'shortlisted' %}checked{% endif %}/>
+                    <span>&nbsp;</span>
+                  </label>
+                </td>
+                <td style="font-weight:700;color:#003087;">{{ forloop.counter }}</td>
+                <td>
+                  <a href="{% url 'hr_admin:application_detail' app.pk %}"
+                     style="color:#003087;font-weight:600;">{{ app.full_name }}</a>
+                </td>
+                <td>{{ app.province }}</td>
+                <td>
+                  <span class="chip" style="background:#e3eaf6;color:#003087;font-size:11px;">
+                    {{ app.get_qualification_display }}
+                  </span>
+                </td>
+                <td>{{ app.grade|default:"—" }}</td>
+                <td>{{ app.years_experience|default:"0" }} yr{{ app.years_experience|pluralize }}</td>
+                <td>
+                  {% if app.score >= 70 %}
+                    <span class="chip score-hi" style="font-size:11px;">{{ app.score }}</span>
+                  {% elif app.score >= 50 %}
+                    <span class="chip score-md" style="font-size:11px;">{{ app.score }}</span>
+                  {% else %}
+                    <span class="chip score-lo" style="font-size:11px;">{{ app.score }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="chip s-{{ app.status }}" style="font-size:11px;">
+                    {{ app.get_status_display }}
+                  </span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:16px 20px;">
+        <button type="submit" class="btn" style="background:#003087;">
+          <i class="material-icons left">star</i>Confirm Shortlist
+        </button>
+        <span style="color:#888;font-size:12px;margin-left:12px;">
+          Selected candidates will be notified by email.
+        </span>
+      </div>
+    </form>
+  {% else %}
+    <div class="empty-state" style="padding:40px;text-align:center;color:#aaa;">
+      <i class="material-icons" style="font-size:48px;color:#e0e0e0;">star_border</i>
+      <p>No qualified applicants above threshold {{ threshold|default:50 }}.</p>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Below Threshold Card -->
+{% if below_threshold %}
+  <div class="card" style="border-radius:8px;">
+    <div class="card-content" style="padding-bottom:0;">
+      <span class="card-title" style="color:#c62828;font-weight:700;font-size:16px;">
+        <i class="material-icons tiny" style="color:#c62828;">cancel</i>
+        Below Threshold
+        <span class="chip" style="background:#ffebee;color:#c62828;font-size:11px;float:right;">{{ below_count|default:"0" }}</span>
+      </span>
+    </div>
+    <div class="responsive-table">
+      <table class="striped" style="font-size:13px;">
+        <thead style="background:#ffebee;">
+          <tr>
+            <th style="color:#c62828;">Name</th>
+            <th style="color:#c62828;">Province</th>
+            <th style="color:#c62828;">Qualification</th>
+            <th style="color:#c62828;">Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for app in below_threshold %}
+            <tr>
+              <td style="color:#555;">{{ app.full_name }}</td>
+              <td>{{ app.province }}</td>
+              <td>
+                <span class="chip" style="background:#f5f5f5;color:#888;font-size:11px;">
+                  {{ app.get_qualification_display }}
+                </span>
+              </td>
+              <td>
+                <span class="chip score-lo" style="font-size:11px;">{{ app.score }}</span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 {% endif %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.getElementById('checkAll').addEventListener('change', function() {
-    document.querySelectorAll('.app-check').forEach(cb => cb.checked = this.checked);
-});
+  document.addEventListener('DOMContentLoaded', function () {
+    // Select-all checkbox logic
+    var selectAllCb = document.getElementById('select-all');
+    var appCheckboxes = document.querySelectorAll('.app-checkbox');
+
+    if (selectAllCb) {
+      selectAllCb.addEventListener('change', function () {
+        appCheckboxes.forEach(function (cb) {
+          cb.checked = selectAllCb.checked;
+        });
+      });
+      // Update select-all state when individual checkboxes change
+      appCheckboxes.forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          var allChecked = Array.from(appCheckboxes).every(function (c) { return c.checked; });
+          var someChecked = Array.from(appCheckboxes).some(function (c) { return c.checked; });
+          selectAllCb.checked = allChecked;
+          selectAllCb.indeterminate = someChecked && !allChecked;
+        });
+      });
+    }
+
+    M.updateTextFields();
+  });
 </script>
 {% endblock %}

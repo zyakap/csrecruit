@@ -3,402 +3,255 @@
 
 {% block title %}{{ vacancy.title }} | PNGCS Recruitment Portal{% endblock %}
 
-{% block extra_head %}
-<style>
-  .breadcrumb-row {
-    background: #f5f7fa;
-    border-bottom: 1px solid #e0e4ea;
-    padding: 10px 0;
-    margin-bottom: 28px;
-  }
-  .breadcrumb-row a.breadcrumb {
-    color: #003087;
-    font-size: 0.9rem;
-  }
-  .breadcrumb-row .breadcrumb:last-child { color: #546e7a; }
-  .breadcrumb-row .breadcrumb:before { color: #90a4ae; }
-
-  /* Main detail card */
-  .detail-card {
-    border-radius: 10px;
-    border-top: 5px solid #003087;
-  }
-  .detail-card .card-content { padding: 28px 28px 8px; }
-  .vacancy-title {
-    font-size: 1.45rem;
-    font-weight: 800;
-    color: #003087;
-    margin: 0 0 14px;
-    line-height: 1.3;
-  }
-
-  .section-divider {
-    border: none;
-    border-top: 2px solid #e8edf7;
-    margin: 24px 0 18px;
-  }
-  .section-heading {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #003087;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-  .section-heading i { color: #FFD700; font-size: 1.1rem; }
-
-  .description-body { font-size: 0.96rem; color: #37474f; line-height: 1.75; }
-  .description-body ul { list-style: disc; padding-left: 22px; margin: 8px 0; }
-  .description-body li { margin-bottom: 4px; }
-
-  /* Chips */
-  .chip { border-radius: 20px; font-size: 0.78rem; font-weight: 600; height: 26px; line-height: 26px; padding: 0 12px; display: inline-flex; align-items: center; gap: 4px; }
-  .chip.ref-chip   { background: #003087; color: #FFD700; }
-  .chip.prov-chip  { background: #fff8e1; color: #b8860b; }
-  .chip.cat-chip   { background: #e8f5e9; color: #2e7d32; }
-  .chip.qual-chip  { background: #fce4ec; color: #880e4f; }
-  .chip.dept-chip  { background: #e8edf7; color: #003087; }
-
-  /* Sticky sidebar */
-  .sidebar-card {
-    border-radius: 10px;
-    border-top: 4px solid #FFD700;
-    position: sticky;
-    top: 72px;
-  }
-  .sidebar-card .card-content { padding: 22px 22px 10px; }
-  .sidebar-card-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #003087;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .sidebar-card-title i { color: #FFD700; }
-
-  .detail-table { width: 100%; border-collapse: collapse; }
-  .detail-table tr td {
-    padding: 7px 4px;
-    font-size: 0.88rem;
-    border-bottom: 1px solid #f0f2f5;
-    vertical-align: top;
-  }
-  .detail-table tr:last-child td { border-bottom: none; }
-  .detail-table td:first-child {
-    color: #78909c;
-    font-weight: 600;
-    width: 44%;
-    white-space: nowrap;
-  }
-  .detail-table td:last-child { color: #263238; font-weight: 500; }
-
-  .salary-block {
-    background: linear-gradient(135deg, #003087, #004bb5);
-    border-radius: 8px;
-    padding: 14px 16px;
-    margin: 16px 0 0;
-    color: #fff;
-    text-align: center;
-  }
-  .salary-block .salary-label { font-size: 0.78rem; opacity: 0.8; margin-bottom: 2px; }
-  .salary-block .salary-amount { font-size: 1.22rem; font-weight: 800; color: #FFD700; }
-
-  .apply-section { padding: 16px 22px 20px; }
-  .btn-pngcs {
-    width: 100%;
-    background-color: #003087 !important;
-    color: #FFD700 !important;
-    font-weight: 700;
-    border-radius: 6px;
-    letter-spacing: 0.5px;
-    height: 44px;
-    line-height: 44px;
-    font-size: 0.98rem;
-  }
-  .btn-pngcs:hover { background-color: #004bb5 !important; }
-  .btn-pngcs.disabled, .btn-pngcs[disabled] {
-    background-color: #b0bec5 !important;
-    color: #fff !important;
-    cursor: not-allowed;
-    box-shadow: none !important;
-  }
-
-  .login-prompt {
-    background: #fff8e1;
-    border: 1px solid #FFD700;
-    border-radius: 8px;
-    padding: 14px;
-    text-align: center;
-    font-size: 0.9rem;
-    color: #5d4037;
-  }
-  .login-prompt a { color: #003087; font-weight: 700; }
-
-  .already-applied-msg {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: #e8f5e9;
-    border-radius: 6px;
-    padding: 10px 14px;
-    font-size: 0.88rem;
-    color: #2e7d32;
-    font-weight: 600;
-    margin-bottom: 10px;
-  }
-  .already-applied-msg i { color: #4caf50; }
-
-  .close-warning {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    color: #c62828;
-    font-weight: 600;
-    margin-top: 8px;
-    justify-content: center;
-  }
-
-  @media (max-width: 600px) {
-    .sidebar-card { position: static; top: auto; }
-    .detail-card .card-content { padding: 18px 14px 8px; }
-    .vacancy-title { font-size: 1.15rem; }
-  }
-</style>
-{% endblock %}
-
 {% block content %}
 
-{# ── Breadcrumb ─────────────────────────────────────────────────────── #}
-<div class="breadcrumb-row">
+<!-- Breadcrumb -->
+<div style="background:#003087; padding:.6rem 0;">
   <div class="container">
-    <nav style="background:transparent; box-shadow:none; padding:0;">
+    <nav style="background:transparent; box-shadow:none; height:auto; line-height:normal;">
       <div class="nav-wrapper">
-        <div class="col s12">
-          <a href="{% url 'recruitment:job_list' %}" class="breadcrumb">
-            <i class="material-icons tiny" style="vertical-align:middle; margin-right:2px;">work_outline</i>Vacancies
-          </a>
-          <span class="breadcrumb">{{ vacancy.title }}</span>
+        <div class="col s12" style="padding:0;">
+          <a href="{% url 'recruitment:job_list' %}" class="breadcrumb white-text"
+             style="font-size:.9rem; opacity:.85;">Vacancies</a>
+          <span class="breadcrumb white-text" style="font-size:.9rem; font-weight:600;">
+            {{ vacancy.title }}
+          </span>
         </div>
       </div>
     </nav>
   </div>
 </div>
 
-{# ── Flash Messages ─────────────────────────────────────────────────── #}
 {% if messages %}
-<div class="container" style="margin-bottom:8px;">
+<div class="container" style="margin-top:1rem;">
   {% for message in messages %}
-  <div class="msg-flash {{ message.tags }} z-depth-1">
-    <i class="material-icons tiny">
-      {% if message.tags == 'success' %}check_circle{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}
-    </i>
-    {{ message }}
-  </div>
+    <div class="msg-flash {{ message.tags }}">
+      <i class="material-icons left">
+        {% if message.tags == 'success' %}check_circle
+        {% elif message.tags == 'warning' %}warning
+        {% else %}info{% endif %}
+      </i>
+      {{ message }}
+    </div>
   {% endfor %}
 </div>
 {% endif %}
 
-{# ── Main Grid ──────────────────────────────────────────────────────── #}
-<div class="container">
+<div class="container" style="margin-top:1.5rem; margin-bottom:3rem;">
   <div class="row">
 
-    {# ── LEFT: Job Detail ────────────────────────────────────────────── #}
+    <!-- LEFT COLUMN: Job Details -->
     <div class="col s12 m8">
-      <div class="card detail-card z-depth-1">
+      <div class="card z-depth-1" style="border-radius:6px; overflow:visible;">
         <div class="card-content">
 
-          {# Title + chips row #}
-          <h3 class="vacancy-title">{{ vacancy.title }}</h3>
-          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:18px;">
-            <span class="chip ref-chip">
-              <i class="material-icons" style="font-size:13px;">tag</i>
-              {{ vacancy.reference_number }}
+          <!-- Title + Reference -->
+          <div style="margin-bottom:1rem;">
+            <h4 style="margin:0 0 .5rem 0; font-size:1.5rem; font-weight:700; color:#003087; line-height:1.3;">
+              {{ vacancy.title }}
+            </h4>
+            <span class="chip" style="background:#E8EDF5; color:#003087; font-weight:600; font-size:.8rem;">
+              <i class="material-icons tiny" style="margin-right:3px;">tag</i>
+              Ref: {{ vacancy.reference_number|default:vacancy.pk }}
             </span>
-            <span class="chip dept-chip">
-              <i class="material-icons" style="font-size:13px;">business</i>
+            <span class="chip" style="background:#E8EDF5; color:#003087; font-size:.8rem;">
+              <i class="material-icons tiny" style="margin-right:3px;">account_balance</i>
               {{ vacancy.department }}
             </span>
-            <span class="chip prov-chip">
-              <i class="material-icons" style="font-size:13px;">location_on</i>
+            <span class="chip" style="background:#E8EDF5; color:#003087; font-size:.8rem;">
+              <i class="material-icons tiny" style="margin-right:3px;">location_on</i>
               {{ vacancy.province }}
             </span>
-            <span class="chip cat-chip">{{ vacancy.get_category_display }}</span>
-            <span class="chip qual-chip">{{ vacancy.get_min_qualification_display }}</span>
           </div>
 
-          {# ── Description ─────────────────────────────────────────── #}
-          <div class="section-heading">
-            <i class="material-icons">description</i>
-            Position Description
-          </div>
-          <div class="description-body">
-            {{ vacancy.description|linebreaks }}
+          <div class="section-divider"></div>
+
+          <!-- Description Section -->
+          <div style="margin-bottom:1.25rem;">
+            <h6 style="font-weight:700; color:#003087; font-size:1rem; margin:0 0 .75rem 0; display:flex; align-items:center; gap:.4rem;">
+              <i class="material-icons small" style="color:#FFD700;">description</i>
+              Position Description
+            </h6>
+            <div style="color:#444; line-height:1.75; font-size:.95rem;">
+              {{ vacancy.description|linebreaks }}
+            </div>
           </div>
 
-          <hr class="section-divider">
+          <div class="section-divider"></div>
 
-          {# ── Requirements ────────────────────────────────────────── #}
-          <div class="section-heading">
-            <i class="material-icons">checklist</i>
-            Selection Criteria &amp; Requirements
-          </div>
-          <div class="description-body">
-            {{ vacancy.requirements|linebreaks }}
-          </div>
-
-          {% if vacancy.duties %}
-          <hr class="section-divider">
-          <div class="section-heading">
-            <i class="material-icons">assignment</i>
-            Key Duties &amp; Responsibilities
-          </div>
-          <div class="description-body">
-            {{ vacancy.duties|linebreaks }}
-          </div>
-          {% endif %}
-
-          {% if vacancy.benefits %}
-          <hr class="section-divider">
-          <div class="section-heading">
-            <i class="material-icons">card_giftcard</i>
-            Benefits &amp; Conditions
-          </div>
-          <div class="description-body">
-            {{ vacancy.benefits|linebreaks }}
-          </div>
-          {% endif %}
-
-          <hr class="section-divider">
-
-          {# ── How to Apply ─────────────────────────────────────────── #}
-          <div class="section-heading">
-            <i class="material-icons">send</i>
-            How to Apply
-          </div>
-          <div class="description-body">
-            <p>Applications must be submitted online via the PNGCS Recruitment Portal by
-            <strong style="color:#c62828;">{{ vacancy.closing_date|date:"l, d F Y" }}</strong>.</p>
-            <ul>
-              <li>Ensure your profile is complete and up-to-date before applying.</li>
-              <li>Upload all required supporting documents (CV, certificates, referees).</li>
-              <li>Only shortlisted applicants will be contacted for interviews.</li>
-            </ul>
-          </div>
-
-        </div>{# /card-content #}
-      </div>{# /detail-card #}
-    </div>{# /col m8 #}
-
-    {# ── RIGHT: Sidebar ──────────────────────────────────────────────── #}
-    <div class="col s12 m4">
-      <div class="card sidebar-card z-depth-1">
-        <div class="card-content">
-          <div class="sidebar-card-title">
-            <i class="material-icons">info_outline</i>
-            Position Details
-          </div>
-
-          <table class="detail-table">
-            <tr>
-              <td>Department</td>
-              <td>{{ vacancy.department }}</td>
-            </tr>
-            <tr>
-              <td>Province</td>
-              <td>{{ vacancy.province }}</td>
-            </tr>
-            <tr>
-              <td>Category</td>
-              <td>{{ vacancy.get_category_display }}</td>
-            </tr>
-            <tr>
-              <td>Employment Type</td>
-              <td>{{ vacancy.get_employment_type_display|default:"Permanent" }}</td>
-            </tr>
-            <tr>
-              <td>Min. Qualification</td>
-              <td>{{ vacancy.get_min_qualification_display }}</td>
-            </tr>
-            <tr>
-              <td>Positions Available</td>
-              <td><strong>{{ vacancy.positions }}</strong></td>
-            </tr>
-            <tr>
-              <td>Date Posted</td>
-              <td>{{ vacancy.created_at|date:"d M Y" }}</td>
-            </tr>
-            <tr>
-              <td>Closing Date</td>
-              <td style="color:#c62828; font-weight:700;">{{ vacancy.closing_date|date:"d M Y" }}</td>
-            </tr>
-          </table>
-
-          {% if vacancy.salary_min or vacancy.salary_max %}
-          <div class="salary-block">
-            <div class="salary-label">Annual Salary Range (PGK)</div>
-            <div class="salary-amount">
-              {% if vacancy.salary_min and vacancy.salary_max %}
-                K{{ vacancy.salary_min|floatformat:0 }} &ndash; K{{ vacancy.salary_max|floatformat:0 }}
-              {% elif vacancy.salary_min %}
-                From K{{ vacancy.salary_min|floatformat:0 }}
+          <!-- Requirements Section -->
+          <div style="margin-bottom:1.25rem;">
+            <h6 style="font-weight:700; color:#003087; font-size:1rem; margin:0 0 .75rem 0; display:flex; align-items:center; gap:.4rem;">
+              <i class="material-icons small" style="color:#FFD700;">checklist</i>
+              Selection Criteria &amp; Requirements
+            </h6>
+            <div style="color:#444; line-height:1.75; font-size:.95rem;">
+              {% if vacancy.requirements %}
+                {{ vacancy.requirements|linebreaks }}
               {% else %}
-                Up to K{{ vacancy.salary_max|floatformat:0 }}
+                <p style="color:#999; font-style:italic;">No specific requirements listed.</p>
               {% endif %}
             </div>
           </div>
-          {% endif %}
 
-        </div>{# /card-content #}
-
-        {# ── Apply Section ───────────────────────────────────────────── #}
-        <div class="apply-section">
-
-          {% if user.is_authenticated %}
-
-            {% if already_applied %}
-            <div class="already-applied-msg">
-              <i class="material-icons">check_circle</i>
-              You have already applied for this vacancy.
+          {% if vacancy.duties %}
+          <div class="section-divider"></div>
+          <div style="margin-bottom:1.25rem;">
+            <h6 style="font-weight:700; color:#003087; font-size:1rem; margin:0 0 .75rem 0; display:flex; align-items:center; gap:.4rem;">
+              <i class="material-icons small" style="color:#FFD700;">assignment</i>
+              Key Duties &amp; Responsibilities
+            </h6>
+            <div style="color:#444; line-height:1.75; font-size:.95rem;">
+              {{ vacancy.duties|linebreaks }}
             </div>
-            <a href="{% url 'recruitment:dashboard' %}" class="btn btn-flat waves-effect" style="width:100%; color:#003087; font-weight:600;">
-              <i class="material-icons left">dashboard</i>My Dashboard
-            </a>
-
-            {% elif vacancy.is_closed %}
-            <a class="btn btn-pngcs disabled" disabled>
-              <i class="material-icons left">lock</i>Applications Closed
-            </a>
-
-            {% else %}
-            <a href="{% url 'recruitment:apply' vacancy.pk %}" class="btn btn-pngcs waves-effect waves-light">
-              <i class="material-icons left">send</i>Apply Now
-            </a>
-            <div class="close-warning">
-              <i class="material-icons tiny">schedule</i>
-              Closes {{ vacancy.closing_date|date:"d M Y" }}
-            </div>
-            {% endif %}
-
-          {% else %}
-          <div class="login-prompt">
-            <i class="material-icons" style="color:#FFD700; font-size:2rem; display:block; margin-bottom:6px;">account_circle</i>
-            <strong>Sign in to apply</strong><br>
-            <span style="font-size:0.84rem;">
-              <a href="{% url 'account_login' %}?next={{ request.path }}">Log in</a> or
-              <a href="{% url 'account_signup' %}">Create an account</a>
-            </span>
           </div>
           {% endif %}
 
-        </div>{# /apply-section #}
-      </div>{# /sidebar-card #}
-    </div>{# /col m4 #}
+        </div><!-- /card-content -->
+      </div><!-- /card -->
+    </div><!-- /left col -->
 
-  </div>{# /row #}
-</div>{# /container #}
+    <!-- RIGHT COLUMN: Position Details Sticky Card + Apply -->
+    <div class="col s12 m4">
+      <div style="position:sticky; top:80px;">
 
+        <!-- Position Details Card -->
+        <div class="card z-depth-1" style="border-radius:6px;">
+          <div class="card-content" style="padding:1.25rem;">
+            <h6 style="font-weight:700; color:#003087; margin:0 0 1rem 0; font-size:1rem; border-bottom:2px solid #FFD700; padding-bottom:.5rem;">
+              <i class="material-icons tiny" style="vertical-align:middle; margin-right:4px;">info</i>
+              Position Details
+            </h6>
+
+            <table style="font-size:.88rem; width:100%; border-collapse:collapse;">
+              <tbody>
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                  <td style="padding:.5rem .25rem; color:#888; width:45%;">
+                    <i class="material-icons tiny" style="vertical-align:middle; margin-right:3px; color:#003087;">category</i>
+                    Category
+                  </td>
+                  <td style="padding:.5rem .25rem; color:#333; font-weight:500;">
+                    {{ vacancy.category|default:"—" }}
+                  </td>
+                </tr>
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                  <td style="padding:.5rem .25rem; color:#888;">
+                    <i class="material-icons tiny" style="vertical-align:middle; margin-right:3px; color:#003087;">school</i>
+                    Qualification
+                  </td>
+                  <td style="padding:.5rem .25rem; color:#333; font-weight:500;">
+                    {{ vacancy.required_qualification|default:"—" }}
+                  </td>
+                </tr>
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                  <td style="padding:.5rem .25rem; color:#888;">
+                    <i class="material-icons tiny" style="vertical-align:middle; margin-right:3px; color:#003087;">group</i>
+                    Positions
+                  </td>
+                  <td style="padding:.5rem .25rem; color:#333; font-weight:500;">
+                    {{ vacancy.positions }}
+                  </td>
+                </tr>
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                  <td style="padding:.5rem .25rem; color:#888;">
+                    <i class="material-icons tiny" style="vertical-align:middle; margin-right:3px; color:#003087;">payments</i>
+                    Salary Band
+                  </td>
+                  <td style="padding:.5rem .25rem; color:#333; font-weight:500;">
+                    {% if vacancy.salary_min and vacancy.salary_max %}
+                      K{{ vacancy.salary_min|floatformat:0 }} – K{{ vacancy.salary_max|floatformat:0 }}
+                    {% elif vacancy.salary_band %}
+                      {{ vacancy.salary_band }}
+                    {% else %}
+                      <span style="color:#aaa;">Not specified</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr style="border-bottom:1px solid #f0f0f0;">
+                  <td style="padding:.5rem .25rem; color:#888;">
+                    <i class="material-icons tiny" style="vertical-align:middle; margin-right:3px; color:#003087;">event_available</i>
+                    Posted
+                  </td>
+                  <td style="padding:.5rem .25rem; color:#333; font-weight:500;">
+                    {{ vacancy.posted_date|date:"d M Y"|default:"—" }}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:.5rem .25rem; color:#888;">
+                    <i class="material-icons tiny" style="vertical-align:middle; margin-right:3px; color:#c62828;">event_busy</i>
+                    Closes
+                  </td>
+                  <td style="padding:.5rem .25rem; color:#c62828; font-weight:700;">
+                    {{ vacancy.closing_date|date:"d M Y" }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div><!-- /card-content -->
+        </div><!-- /details card -->
+
+        <!-- Apply Card -->
+        <div class="card z-depth-1" style="border-radius:6px;">
+          <div class="card-content" style="padding:1.25rem; text-align:center;">
+            {% if user.is_authenticated %}
+              {% if already_applied %}
+                <div style="margin-bottom:.75rem;">
+                  <i class="material-icons" style="color:#43a047; font-size:2.5rem;">check_circle</i>
+                  <p style="color:#43a047; font-weight:600; margin:.25rem 0 0 0; font-size:.95rem;">
+                    You have already applied for this position.
+                  </p>
+                </div>
+                <a href="{% url 'recruitment:dashboard' %}" class="btn-flat waves-effect pngcs-text" style="font-size:.88rem;">
+                  <i class="material-icons left">dashboard</i>View My Applications
+                </a>
+                <div style="margin-top:.75rem;">
+                  <button class="btn pngcs waves-effect waves-light disabled" disabled
+                          style="width:100%; font-size:.9rem; letter-spacing:.5px;">
+                    <i class="material-icons left">how_to_reg</i>Already Applied
+                  </button>
+                </div>
+              {% else %}
+                <p style="color:#555; font-size:.9rem; margin-bottom:1rem;">
+                  Ready to apply? Submit your application for this position.
+                </p>
+                <a href="{% url 'recruitment:apply' vacancy.pk %}"
+                   class="btn pngcs waves-effect waves-light"
+                   style="width:100%; font-size:.95rem; letter-spacing:.5px; height:2.75rem; line-height:2.75rem;">
+                  <i class="material-icons left">send</i>Apply Now
+                </a>
+              {% endif %}
+            {% else %}
+              <div style="margin-bottom:.75rem;">
+                <i class="material-icons" style="color:#FFD700; font-size:2.5rem;">lock</i>
+                <p style="color:#555; font-size:.9rem; margin:.5rem 0 0 0;">
+                  You must be logged in to apply for this position.
+                </p>
+              </div>
+              <a href="{% url 'account_login' %}?next={{ request.path }}"
+                 class="btn pngcs waves-effect waves-light"
+                 style="width:100%; font-size:.9rem; margin-bottom:.5rem; height:2.5rem; line-height:2.5rem;">
+                <i class="material-icons left">login</i>Login to Apply
+              </a>
+              <p style="color:#999; font-size:.82rem; margin:0;">
+                Don't have an account?
+                <a href="{% url 'account_signup' %}" style="color:#003087; font-weight:600;">Register here</a>
+              </p>
+            {% endif %}
+          </div>
+        </div><!-- /apply card -->
+
+      </div><!-- /sticky wrapper -->
+    </div><!-- /right col -->
+
+  </div><!-- /row -->
+</div><!-- /container -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Nothing additional needed; Materialize handles any components
+  });
+</script>
 {% endblock %}
