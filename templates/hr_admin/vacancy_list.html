@@ -125,8 +125,8 @@
                     {% endif %}
                   </a>
                   <!-- AI Screening -->
-                  <a href="{% url 'hr_admin:ai_screen' vacancy.pk %}"
-                     class="btn-small tooltipped" data-position="top" data-tooltip="AI Screening"
+                  <a href="{% url 'hr_admin:run_screening' vacancy.pk %}"
+                     class="btn-small tooltipped" data-position="top" data-tooltip="Auto Screening"
                      style="background:#6a1b9a;padding:0 8px;margin:1px;">
                     <i class="material-icons" style="font-size:14px;">smart_toy</i>
                   </a>
@@ -136,9 +136,15 @@
                      style="background:#f9a825;padding:0 8px;margin:1px;">
                     <i class="material-icons" style="font-size:14px;">star</i>
                   </a>
+                  <!-- Bulk OCR -->
+                  <a href="{% url 'hr_admin:bulk_ocr_vacancy' vacancy.pk %}"
+                     class="btn-small tooltipped" data-position="top" data-tooltip="Bulk OCR — generate summaries for all applications"
+                     style="background:#00695c;padding:0 8px;margin:1px;">
+                    <i class="material-icons" style="font-size:14px;">document_scanner</i>
+                  </a>
                   <!-- Export -->
-                  <a href="{% url 'hr_admin:export_applications' vacancy.pk %}"
-                     class="btn-small tooltipped" data-position="top" data-tooltip="Export Applications"
+                  <a href="{% url 'hr_admin:export_shortlist' vacancy.pk %}"
+                     class="btn-small tooltipped" data-position="top" data-tooltip="Export Shortlist"
                      style="background:#2e7d32;padding:0 8px;margin:1px;">
                     <i class="material-icons" style="font-size:14px;">download</i>
                   </a>

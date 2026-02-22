@@ -349,11 +349,14 @@
           <div style="font-size:3rem;color:#ccc;margin:16px 0 4px;">—</div>
           <div style="font-size:13px;color:#bbb;margin-bottom:16px;">Not yet scored</div>
         {% endif %}
-        <a href="{% url 'hr_admin:rescore_application' application.pk %}"
-           class="btn btn-block" style="background:#003087;width:100%;margin-bottom:8px;">
-          <i class="material-icons left">refresh</i>Re-score
-        </a>
-        <a href="{% url 'hr_admin:schedule_interview' application.pk %}"
+        <form method="post" style="margin-bottom:8px;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="rescore">
+          <button type="submit" class="btn btn-block" style="background:#003087;width:100%;">
+            <i class="material-icons left">refresh</i>Re-score
+          </button>
+        </form>
+        <a href="{% url 'hr_admin:interview_schedule' application.pk %}"
            class="btn btn-block" style="background:#2e7d32;width:100%;">
           <i class="material-icons left">event</i>Schedule Interview
         </a>
@@ -366,11 +369,12 @@
         <span class="card-title" style="color:#003087;font-weight:700;font-size:16px;">
           <i class="material-icons tiny">update</i> Update Status
         </span>
-        <form method="post" action="{% url 'hr_admin:update_application_status' application.pk %}">
+        <form method="post" action="{% url 'hr_admin:application_detail' application.pk %}">
           {% csrf_token %}
+          <input type="hidden" name="action" value="update_status">
           <div class="input-field">
             <select id="status-select" name="status">
-              {% for value, label in status_choices %}
+              {% for value, label in statuses %}
                 <option value="{{ value }}" {% if application.status == value %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
